@@ -23,14 +23,45 @@ public sealed class AgentNeeds
         Satiation = satiation;
     }
 
-    internal void Advance(float tirednessIncrease, float satiationDecrease)
+    internal float IncreaseTiredness(float amount)
     {
-        if (!float.IsFinite(tirednessIncrease) || tirednessIncrease < 0f)
-            throw new ArgumentOutOfRangeException(nameof(tirednessIncrease));
-        if (!float.IsFinite(satiationDecrease) || satiationDecrease < 0f)
-            throw new ArgumentOutOfRangeException(nameof(satiationDecrease));
+        ValidateAmount(amount);
 
-        Tiredness = Math.Min(1f, Tiredness + tirednessIncrease);
-        Satiation = Math.Max(0f, Satiation - satiationDecrease);
+        var previous = Tiredness;
+        Tiredness = Math.Min(1f, Tiredness + amount);
+        return Tiredness - previous;
+    }
+
+    internal float DecreaseTiredness(float amount)
+    {
+        ValidateAmount(amount);
+
+        var previous = Tiredness;
+        Tiredness = Math.Max(0f, Tiredness - amount);
+        return previous - Tiredness;
+    }
+
+    internal float IncreaseSatiation(float amount)
+    {
+        ValidateAmount(amount);
+
+        var previous = Satiation;
+        Satiation = Math.Min(1f, Satiation + amount);
+        return Satiation - previous;
+    }
+
+    internal float DecreaseSatiation(float amount)
+    {
+        ValidateAmount(amount);
+
+        var previous = Satiation;
+        Satiation = Math.Max(0f, Satiation - amount);
+        return previous - Satiation;
+    }
+
+    private static void ValidateAmount(float amount)
+    {
+        if (!float.IsFinite(amount) || amount <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(amount));
     }
 }

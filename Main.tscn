@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bi4gb5ynl3cjf"]
+
+[ext_resource type="Script" uid="uid://gn1wuqvwkgei" path="res://Main.cs" id="1_main"]
+[ext_resource type="PackedScene" path="res://Nodes/Menu/menu_screen.tscn" id="2_menu"]
+[ext_resource type="PackedScene" path="res://Nodes/Game/game.tscn" id="3_game"]
+
+[node name="Main" type="Node" unique_id=359199611]
+script = ExtResource("1_main")
+MenuScene = ExtResource("2_menu")
+GameScene = ExtResource("3_game")

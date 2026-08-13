@@ -1,0 +1,50 @@
+using Godot;
+using Solitude.Domain.Game.Construction;
+using Solitude.Domain.Game.Agents;
+using Solitude.Domain.Game.Agents.Activity;
+using Solitude.Domain.Game.Map;
+using Solitude.Domain.Game;
+
+namespace Solitude.Domain.Game.Commands;
+
+public sealed class PlayerCommandService
+{
+    private readonly World _world;
+    private readonly ActivityService _activityService;
+
+    public PlayerCommandService(
+        World world,
+        ActivityService activityService)
+    {
+        _world = world;
+        _activityService = activityService;
+    }
+
+    public void Move(AgentId agentId, Vector2I cell)
+    {
+        if (!_world.TryGetAgent(agentId, out var agent)
+            || !_world.TryFindPath(agent.Cell, cell, PathGoalMode.ExactCell, out _)) return;
+
+        _activityService.Replace(agent, ActivityComposer.ComposeMove(cell));
+    }
+
+    public bool CanConstruct(Vector2I cell) => _world.CanPlaceConstruction(cell);
+
+    public void Construct(Vector2I cell)
+    {
+        if (!CanConstruct(cell)) return;
+        var siteId = _world.CreateConstructionSite(cell, BuildingType.Wall);
+        _world.GetOrAddConstructOrder(siteId);
+    }
+
+    public bool CanDamage(Vector2I cell)
+    {
+        return _world.ObjectAt(cell) is { IsDestroyed: false };
+    }
+
+    public void Damage(Vector2I cell)
+    {
+        if (!CanDamage(cell) || _world.ObjectAt(cell) is not { } target) return;
+        _world.GetOrAddDamageOrder(target.Id);
+    }
+}

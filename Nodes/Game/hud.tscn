@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://Nodes/Game/HudNode.cs" id="1_hud"]
 
@@ -13,6 +13,27 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.2039, 0.2353, 0.2745, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="NeedBackground"]
+bg_color = Color(0.1098, 0.1294, 0.1569, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="TirednessFill"]
+bg_color = Color(0.5216, 0.451, 0.3686, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="SatiationFill"]
+bg_color = Color(0.3137, 0.5216, 0.4667, 1)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
@@ -81,7 +102,7 @@ layout_mode = 0
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 276.0
-offset_bottom = 84.0
+offset_bottom = 132.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("SelectionPanelStyle")
 
@@ -93,6 +114,52 @@ theme_override_constants/separation = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.851, 0.8706, 0.898, 1)
 theme_override_font_sizes/font_size = 16
+
+[node name="Needs" type="GridContainer" parent="SelectionPanel/Content"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 3
+columns = 2
+
+[node name="TirednessLabel" type="Label" parent="SelectionPanel/Content/Needs"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6392, 0.6706, 0.7098, 1)
+theme_override_font_sizes/font_size = 12
+text = "Tiredness"
+
+[node name="Tiredness" type="ProgressBar" parent="SelectionPanel/Content/Needs"]
+custom_minimum_size = Vector2(150, 17)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+max_value = 1.0
+step = 0.01
+value = 0.2
+theme_override_colors/font_color = Color(0.949, 0.9608, 0.9725, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/background = SubResource("NeedBackground")
+theme_override_styles/fill = SubResource("TirednessFill")
+
+[node name="SatiationLabel" type="Label" parent="SelectionPanel/Content/Needs"]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6392, 0.6706, 0.7098, 1)
+theme_override_font_sizes/font_size = 12
+text = "Satiation"
+
+[node name="Satiation" type="ProgressBar" parent="SelectionPanel/Content/Needs"]
+custom_minimum_size = Vector2(150, 17)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+max_value = 1.0
+step = 0.01
+value = 0.8
+theme_override_colors/font_color = Color(0.949, 0.9608, 0.9725, 1)
+theme_override_font_sizes/font_size = 11
+theme_override_styles/background = SubResource("NeedBackground")
+theme_override_styles/fill = SubResource("SatiationFill")
 
 [node name="Inventory" type="Label" parent="SelectionPanel/Content"]
 layout_mode = 2

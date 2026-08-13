@@ -9,6 +9,7 @@ public sealed class Simulation
     private const float DecisionStepSeconds = 0.15f;
 
     private readonly MovementProcess _movement;
+    private readonly NeedsProcess _needs;
     private readonly DecisionProcess _decision;
     private readonly PlanExecutionProcess _planExecution;
     private readonly State _state;
@@ -26,12 +27,14 @@ public sealed class Simulation
         _planExecution = new PlanExecutionProcess(state.World, executor);
         _decision = new DecisionProcess(state.World);
         _movement = new MovementProcess(state.World);
+        _needs = new NeedsProcess(state.World);
         Commands = new PlayerCommandService(state.World);
     }
 
     public void Update(float delta)
     {
         _state.Clock.Advance(delta);
+        _needs.Step(delta);
         _movement.Step(delta);
         _decisionAccumulator += delta;
         while (_decisionAccumulator >= DecisionStepSeconds)

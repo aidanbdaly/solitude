@@ -15,6 +15,8 @@ public partial class HudNode : Control
     private CursorNode _cursor = null!;
     private Control _selectionPanel = null!;
     private Label _selectionName = null!;
+    private ProgressBar _tiredness = null!;
+    private ProgressBar _satiation = null!;
     private Label _selectionInventory = null!;
     private Label _timeLabel = null!;
     private Button _pauseButton = null!;
@@ -26,6 +28,8 @@ public partial class HudNode : Control
     {
         _selectionPanel = GetNode<Control>("SelectionPanel");
         _selectionName = GetNode<Label>("SelectionPanel/Content/Name");
+        _tiredness = GetNode<ProgressBar>("SelectionPanel/Content/Needs/Tiredness");
+        _satiation = GetNode<ProgressBar>("SelectionPanel/Content/Needs/Satiation");
         _selectionInventory = GetNode<Label>("SelectionPanel/Content/Inventory");
         _timeLabel = GetNode<Label>("BottomToolbar/Margin/Row/Time");
 
@@ -78,6 +82,8 @@ public partial class HudNode : Control
         if (agent is null) return;
 
         _selectionName.Text = agent.Name;
+        _tiredness.Value = agent.Needs.Tiredness;
+        _satiation.Value = agent.Needs.Satiation;
 
         var inventory = new List<string>();
         AddInventory(inventory, "Wood", agent.Inventory.GetCount(ItemType.Wood));

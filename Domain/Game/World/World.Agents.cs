@@ -28,6 +28,7 @@ public sealed partial class World
             Cell = cell,
             Position = cell,
             Definition = definition,
+            Needs = new AgentNeeds(),
             Inventory = new Inventory(definition.InventoryCapacity)
         });
         return id;

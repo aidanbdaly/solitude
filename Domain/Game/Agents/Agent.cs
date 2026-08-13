@@ -11,6 +11,7 @@ public sealed class Agent
 	public required Vector2I Cell { get; set; }
 	public required Vector2 Position { get; set; }
 	public required AgentDefinition Definition { get; init; }
+	public required AgentNeeds Needs { get; init; }
 	public AgentNavigation Navigation { get; } = new();
 	public required Inventory Inventory { get; init; }
 	public Plan? Plan { get; private set; }

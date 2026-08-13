@@ -1,7 +1,6 @@
 using System;
 using Solitude.Domain.Game.Agents;
 using Solitude.Domain.Game.Commands;
-using Solitude.Domain.Game.Orders;
 
 namespace Solitude.Domain.Game;
 
@@ -9,9 +8,9 @@ public sealed class Simulation
 {
     private const float DecisionStepSeconds = 0.15f;
 
-    private readonly MovementService _movement;
-    private readonly DecisionService _decision;
-    private readonly ActivityService _activity;
+    private readonly MovementProcess _movement;
+    private readonly DecisionProcess _decision;
+    private readonly PlanExecutionProcess _planExecution;
     private readonly State _state;
     private float _decisionAccumulator;
 
@@ -23,11 +22,11 @@ public sealed class Simulation
         _state = state;
         ValidateState(state);
 
-        var executor = new ActivityInstructionExecutor(state.World, Publish);
-        _activity = new ActivityService(state.World, executor, HandleActivityCompletion);
-        _decision = new DecisionService(state.World, _activity);
-        _movement = new MovementService(state.World);
-        Commands = new PlayerCommandService(state.World, _activity);
+        var executor = new PlanInstructionExecutor(state.World, Publish);
+        _planExecution = new PlanExecutionProcess(state.World, executor);
+        _decision = new DecisionProcess(state.World);
+        _movement = new MovementProcess(state.World);
+        Commands = new PlayerCommandService(state.World);
     }
 
     public void Update(float delta)
@@ -39,18 +38,8 @@ public sealed class Simulation
         {
             _decisionAccumulator -= DecisionStepSeconds;
             _decision.Step();
-            _activity.Step(DecisionStepSeconds);
+            _planExecution.Step(DecisionStepSeconds);
         }
-    }
-
-    private void HandleActivityCompletion(ActivityCompletion completion)
-    {
-        if (!_state.World.TryGetOrderAssignmentForAgent(completion.AgentId, out _)) return;
-
-        if (completion.Outcome == ActivityOutcome.Succeeded)
-            _state.World.CompleteAssignedOrder(completion.AgentId);
-        else
-            _state.World.ReleaseOrderAssignmentForAgent(completion.AgentId);
     }
 
     private static void ValidateState(State state)
@@ -61,9 +50,9 @@ public sealed class Simulation
             if (!state.World.TryGetAgent(assignment.AgentId, out var agent))
                 throw new InvalidOperationException(
                     $"Order assignment references missing agent {assignment.AgentId.Value}.");
-            if (agent.Activity is null)
+            if (agent.Plan is null)
                 throw new InvalidOperationException(
-                    $"Agent {assignment.AgentId.Value} has an order assignment but no activity.");
+                    $"Agent {assignment.AgentId.Value} has an order assignment but no plan.");
         }
     }
 

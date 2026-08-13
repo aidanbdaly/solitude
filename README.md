@@ -33,13 +33,14 @@ materials, and complete construction autonomously.
 - `Domain/Game`: state boundary, simulation orchestration, and simulation events
 - `Domain/Game/World`: world state and domain mutations, split into focused partial implementations
 - `Domain/Game/Map`: grid, terrain, and spatial-math primitives
-- `Domain/Game/Agents`: agent state, activity programs, navigation, movement, and decision-making
+- `Domain/Game/Agents`: agent state, plans, navigation, and simulation processes
 - `Domain/Game/Construction`: construction-site state and progress
 - `Domain/Game/Orders`: player and simulation orders, assignment state, and assignment lifecycle
 - `Domain/Game/Items`: inventory, item stacks, and reservations
 - `Domain/Game/Objects`: placed flora, rock, and walls
 - `Domain/Game/Commands`: player-facing gameplay commands
-- `Domain/Game/Generation`: world generation and exact Unreal-compatible Perlin noise`n- `Domain/Game/Clock.cs`: simulation time
+- `Domain/Game/Generation`: world generation and exact Unreal-compatible Perlin noise
+- `Domain/Game/Clock.cs`: simulation time
 - `Assets`: imported textures and audio, grouped by owning feature
 
 New-game generation produces a complete `State` before the game scene is

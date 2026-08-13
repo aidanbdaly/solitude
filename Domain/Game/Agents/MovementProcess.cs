@@ -3,12 +3,12 @@ using System.Linq;
 
 namespace Solitude.Domain.Game.Agents;
 
-public sealed class MovementService
+public sealed class MovementProcess
 {
     private const float PositionEpsilonSquared = 0.0001f;
     private readonly World _world;
 
-    public MovementService(World world)
+    public MovementProcess(World world)
     {
         _world = world;
     }

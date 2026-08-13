@@ -2,24 +2,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Solitude.Domain.Game.Agents.Activity;
+namespace Solitude.Domain.Game.Agents.Plans;
 
-public sealed class AgentActivity
+public enum PlanOutcome
 {
-    private readonly ActivityStep[] _steps;
+    Succeeded,
+    Failed,
+    Cancelled
+}
 
-    public IReadOnlyList<ActivityStep> Steps => _steps;
+public sealed class Plan
+{
+    private readonly PlanStep[] _steps;
+
+    public IReadOnlyList<PlanStep> Steps => _steps;
     public int CurrentStep { get; internal set; }
     public float InstructionTimeRemaining { get; internal set; }
-    public ActivityStep Current => CurrentStep >= 0 && CurrentStep < _steps.Length
+    public PlanStep Current => CurrentStep >= 0 && CurrentStep < _steps.Length
         ? _steps[CurrentStep]
-        : throw new InvalidOperationException($"Activity current step {CurrentStep} is invalid.");
+        : throw new InvalidOperationException($"Plan current step {CurrentStep} is invalid.");
 
-    public AgentActivity(IEnumerable<ActivityStep> steps)
+    public Plan(IEnumerable<PlanStep> steps)
     {
         ArgumentNullException.ThrowIfNull(steps);
         _steps = steps.ToArray();
-        if (_steps.Length == 0) throw new ArgumentException("An activity requires at least one step.", nameof(steps));
+        if (_steps.Length == 0)
+            throw new ArgumentException("A plan requires at least one step.", nameof(steps));
         ValidateTransitions();
     }
 
@@ -50,9 +58,11 @@ public sealed class AgentActivity
             Next => source + 1,
             GoTo goTo => goTo.Step,
             Complete or Fail => -1,
-            _ => throw new ArgumentOutOfRangeException(nameof(transition), transition, "Unknown activity transition.")
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(transition), transition, "Unknown plan transition.")
         };
         if (target >= _steps.Length)
-            throw new ArgumentOutOfRangeException(nameof(transition), $"Step {source} transitions outside the activity to step {target}.");
+            throw new ArgumentOutOfRangeException(
+                nameof(transition), $"Step {source} transitions outside the plan to step {target}.");
     }
 }

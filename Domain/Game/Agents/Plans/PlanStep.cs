@@ -1,20 +1,20 @@
-namespace Solitude.Domain.Game.Agents.Activity;
+namespace Solitude.Domain.Game.Agents.Plans;
 
-public enum ActivityInstructionResult
+public enum PlanInstructionResult
 {
     Running,
     Succeeded,
     Failed
 }
 
-public sealed record ActivityStep
+public sealed record PlanStep
 {
-    public ActivityInstruction Instruction { get; }
+    public PlanInstruction Instruction { get; }
     public StepTransition OnSuccess { get; }
     public StepTransition OnFailure { get; }
 
-    public ActivityStep(
-        ActivityInstruction instruction,
+    public PlanStep(
+        PlanInstruction instruction,
         StepTransition onSuccess,
         StepTransition onFailure)
     {

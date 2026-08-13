@@ -1,7 +1,7 @@
 using Godot;
 using Solitude.Domain.Game.Construction;
 using Solitude.Domain.Game.Agents;
-using Solitude.Domain.Game.Agents.Activity;
+using Solitude.Domain.Game.Agents.Plans;
 using Solitude.Domain.Game.Map;
 using Solitude.Domain.Game;
 
@@ -10,14 +10,10 @@ namespace Solitude.Domain.Game.Commands;
 public sealed class PlayerCommandService
 {
     private readonly World _world;
-    private readonly ActivityService _activityService;
 
-    public PlayerCommandService(
-        World world,
-        ActivityService activityService)
+    public PlayerCommandService(World world)
     {
         _world = world;
-        _activityService = activityService;
     }
 
     public void Move(AgentId agentId, Vector2I cell)
@@ -25,7 +21,7 @@ public sealed class PlayerCommandService
         if (!_world.TryGetAgent(agentId, out var agent)
             || !_world.TryFindPath(agent.Cell, cell, PathGoalMode.ExactCell, out _)) return;
 
-        _activityService.Replace(agent, ActivityComposer.ComposeMove(cell));
+        _world.ReplacePlan(agentId, PlanComposer.ComposeMove(cell));
     }
 
     public bool CanConstruct(Vector2I cell) => _world.CanPlaceConstruction(cell);

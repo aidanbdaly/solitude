@@ -1,6 +1,6 @@
 using Godot;
 using Solitude.Domain.Game.Items;
-using Solitude.Domain.Game.Agents.Activity;
+using Solitude.Domain.Game.Agents.Plans;
 
 namespace Solitude.Domain.Game.Agents;
 
@@ -13,8 +13,8 @@ public sealed class Agent
 	public required AgentDefinition Definition { get; init; }
 	public AgentNavigation Navigation { get; } = new();
 	public required Inventory Inventory { get; init; }
-	public AgentActivity? Activity { get; private set; }
+	public Plan? Plan { get; private set; }
 
-	internal void BeginActivity(AgentActivity activity) => Activity = activity;
-	internal void ClearActivity() => Activity = null;
+	internal void BeginPlan(Plan plan) => Plan = plan;
+	internal void ClearPlan() => Plan = null;
 }

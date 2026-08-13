@@ -5,15 +5,15 @@ using Solitude.Domain.Game.Items;
 using Solitude.Domain.Game.Map;
 using Solitude.Domain.Game.Objects;
 
-namespace Solitude.Domain.Game.Agents.Activity;
+namespace Solitude.Domain.Game.Agents.Plans;
 
-public abstract record ActivityInstruction;
+public abstract record PlanInstruction;
 
 public abstract record MoveTarget;
 public sealed record CellTarget(Vector2I Cell) : MoveTarget;
 public sealed record ReservedItemTarget : MoveTarget;
 
-public sealed record MoveInstruction : ActivityInstruction
+public sealed record MoveInstruction : PlanInstruction
 {
     public MoveTarget Target { get; }
     public PathGoalMode GoalMode { get; }
@@ -27,15 +27,15 @@ public sealed record MoveInstruction : ActivityInstruction
     }
 }
 
-public sealed record HasItemCondition(ItemType Type) : ActivityInstruction;
-public sealed record ObjectExistsCondition(MapObjectId Target) : ActivityInstruction;
+public sealed record HasItemCondition(ItemType Type) : PlanInstruction;
+public sealed record ObjectExistsCondition(MapObjectId Target) : PlanInstruction;
 public sealed record ConstructionSiteExistsCondition(
-    ConstructionSiteId Target) : ActivityInstruction;
+    ConstructionSiteId Target) : PlanInstruction;
 public sealed record ConstructionRequirementSatisfiedCondition(
     ConstructionSiteId Target,
-    ItemType Type) : ActivityInstruction;
+    ItemType Type) : PlanInstruction;
 
-public sealed record ReserveItemInstruction : ActivityInstruction
+public sealed record ReserveItemInstruction : PlanInstruction
 {
     public ItemType Type { get; }
     public int MaximumCount { get; }
@@ -49,9 +49,9 @@ public sealed record ReserveItemInstruction : ActivityInstruction
     }
 }
 
-public sealed record CollectReservedItemInstruction : ActivityInstruction;
+public sealed record CollectReservedItemInstruction : PlanInstruction;
 
-public sealed record DamageObjectInstruction : ActivityInstruction
+public sealed record DamageObjectInstruction : PlanInstruction
 {
     public MapObjectId Target { get; }
     public int Amount { get; }
@@ -66,9 +66,9 @@ public sealed record DamageObjectInstruction : ActivityInstruction
 
 public sealed record SupplyConstructionInstruction(
     ConstructionSiteId Target,
-    ItemType Type) : ActivityInstruction;
+    ItemType Type) : PlanInstruction;
 
-public sealed record AdvanceConstructionInstruction : ActivityInstruction
+public sealed record AdvanceConstructionInstruction : PlanInstruction
 {
     public ConstructionSiteId Target { get; }
     public int Amount { get; }
@@ -81,7 +81,7 @@ public sealed record AdvanceConstructionInstruction : ActivityInstruction
     }
 }
 
-public sealed record WaitInstruction : ActivityInstruction
+public sealed record WaitInstruction : PlanInstruction
 {
     public float Duration { get; }
 

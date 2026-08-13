@@ -49,7 +49,7 @@ public sealed partial class World
     public void RemoveAgent(AgentId id)
     {
         var agent = GetAgent(id);
-        if (agent.Activity is not null
+        if (agent.Plan is not null
             || agent.Navigation.Status != AgentNavigationStatus.Idle
             || TryGetOrderAssignmentForAgent(id, out _)
             || TryGetItemReservationForAgent(id, out _))

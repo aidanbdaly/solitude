@@ -2,19 +2,19 @@ using Godot;
 using System;
 using System.Linq;
 using Solitude.Domain.Game.Agents;
-using Solitude.Domain.Game.Agents.Activity;
+using Solitude.Domain.Game.Agents.Plans;
 using Solitude.Domain.Game.Items;
 using Solitude.Domain.Game.Map;
 using Solitude.Domain.Game;
 
 namespace Solitude.Domain.Game;
 
-public sealed class ActivityInstructionExecutor
+public sealed class PlanInstructionExecutor
 {
     private readonly World _world;
     private readonly Action<SimulationEvent> _publish;
 
-    public ActivityInstructionExecutor(
+    public PlanInstructionExecutor(
         World world,
         Action<SimulationEvent> publish)
     {
@@ -22,38 +22,38 @@ public sealed class ActivityInstructionExecutor
         _publish = publish;
     }
 
-    public ActivityInstructionResult Execute(
+    public PlanInstructionResult Execute(
         Agent agent,
-        AgentActivity activity,
-        ActivityInstruction instruction,
+        Plan plan,
+        PlanInstruction instruction,
         ref float remainingTime) => instruction switch
     {
         MoveInstruction move => ExecuteMove(agent, move),
-        WaitInstruction wait => ExecuteWait(activity, wait, ref remainingTime),
+        WaitInstruction wait => ExecuteWait(plan, wait, ref remainingTime),
         HasItemCondition condition => agent.Inventory.GetCount(condition.Type) > 0
-            ? ActivityInstructionResult.Succeeded
-            : ActivityInstructionResult.Failed,
+            ? PlanInstructionResult.Succeeded
+            : PlanInstructionResult.Failed,
         ObjectExistsCondition condition => _world.TryGetObject(condition.Target, out _)
-            ? ActivityInstructionResult.Succeeded
-            : ActivityInstructionResult.Failed,
+            ? PlanInstructionResult.Succeeded
+            : PlanInstructionResult.Failed,
         ConstructionSiteExistsCondition condition =>
             _world.TryGetConstructionSite(condition.Target, out _)
-                ? ActivityInstructionResult.Succeeded
-                : ActivityInstructionResult.Failed,
+                ? PlanInstructionResult.Succeeded
+                : PlanInstructionResult.Failed,
         ConstructionRequirementSatisfiedCondition condition =>
             _world.GetConstructionSite(condition.Target).State.IsRequirementSatisfied(condition.Type)
-                ? ActivityInstructionResult.Succeeded
-                : ActivityInstructionResult.Failed,
+                ? PlanInstructionResult.Succeeded
+                : PlanInstructionResult.Failed,
         ReserveItemInstruction reserve => ExecuteReserveItem(agent, reserve),
         CollectReservedItemInstruction => ExecuteCollectReservedItem(agent),
         DamageObjectInstruction damage => ExecuteDamageObject(agent, damage),
         SupplyConstructionInstruction supply => ExecuteSupplyConstruction(agent, supply),
         AdvanceConstructionInstruction advance => ExecuteAdvanceConstruction(agent, advance),
         _ => throw new ArgumentOutOfRangeException(
-            nameof(instruction), instruction, "Unknown activity instruction.")
+            nameof(instruction), instruction, "Unknown plan instruction.")
     };
 
-    private ActivityInstructionResult ExecuteMove(
+    private PlanInstructionResult ExecuteMove(
         Agent agent,
         MoveInstruction instruction)
     {
@@ -82,7 +82,7 @@ public sealed class ActivityInstructionExecutor
             if (!_world.TryFindPath(agent.Cell, target, instruction.GoalMode, out var path))
             {
                 navigation.Reset();
-                return ActivityInstructionResult.Failed;
+                return PlanInstructionResult.Failed;
             }
             navigation.Begin(target, instruction.GoalMode, path.Skip(1));
         }
@@ -95,40 +95,40 @@ public sealed class ActivityInstructionExecutor
         switch (navigation.Status)
         {
             case AgentNavigationStatus.Moving:
-                return ActivityInstructionResult.Running;
+                return PlanInstructionResult.Running;
             case AgentNavigationStatus.Succeeded:
                 navigation.Reset();
-                return ActivityInstructionResult.Succeeded;
+                return PlanInstructionResult.Succeeded;
             case AgentNavigationStatus.Failed:
                 navigation.Reset();
-                return ActivityInstructionResult.Failed;
+                return PlanInstructionResult.Failed;
             default:
                 throw new InvalidOperationException(
                     $"Agent {agent.Id.Value} has invalid navigation status {navigation.Status}.");
         }
     }
 
-    private static ActivityInstructionResult ExecuteWait(
-        AgentActivity activity,
+    private static PlanInstructionResult ExecuteWait(
+        Plan plan,
         WaitInstruction instruction,
         ref float remainingTime)
     {
-        if (!float.IsFinite(activity.InstructionTimeRemaining)
-            || activity.InstructionTimeRemaining < 0f)
-            throw new InvalidOperationException("Activity contains invalid wait state.");
-        if (activity.InstructionTimeRemaining == 0f)
-            activity.InstructionTimeRemaining = instruction.Duration;
+        if (!float.IsFinite(plan.InstructionTimeRemaining)
+            || plan.InstructionTimeRemaining < 0f)
+            throw new InvalidOperationException("Plan contains invalid wait state.");
+        if (plan.InstructionTimeRemaining == 0f)
+            plan.InstructionTimeRemaining = instruction.Duration;
 
-        var elapsed = Math.Min(activity.InstructionTimeRemaining, remainingTime);
-        activity.InstructionTimeRemaining -= elapsed;
+        var elapsed = Math.Min(plan.InstructionTimeRemaining, remainingTime);
+        plan.InstructionTimeRemaining -= elapsed;
         remainingTime -= elapsed;
-        if (activity.InstructionTimeRemaining > 0f) return ActivityInstructionResult.Running;
+        if (plan.InstructionTimeRemaining > 0f) return PlanInstructionResult.Running;
 
-        activity.InstructionTimeRemaining = 0f;
-        return ActivityInstructionResult.Succeeded;
+        plan.InstructionTimeRemaining = 0f;
+        return PlanInstructionResult.Succeeded;
     }
 
-    private ActivityInstructionResult ExecuteReserveItem(
+    private PlanInstructionResult ExecuteReserveItem(
         Agent agent,
         ReserveItemInstruction instruction)
     {
@@ -149,13 +149,13 @@ public sealed class ActivityInstructionExecutor
                 throw new InvalidOperationException(
                     $"Available item {item.Id.Value} produced a non-positive reservation.");
             _world.ReserveItem(item.Id, agent.Id, count);
-            return ActivityInstructionResult.Succeeded;
+            return PlanInstructionResult.Succeeded;
         }
 
-        return ActivityInstructionResult.Failed;
+        return PlanInstructionResult.Failed;
     }
 
-    private ActivityInstructionResult ExecuteCollectReservedItem(Agent agent)
+    private PlanInstructionResult ExecuteCollectReservedItem(Agent agent)
     {
         var reservation = _world.GetItemReservationForAgent(agent.Id);
         var item = _world.GetItem(reservation.ItemId);
@@ -175,10 +175,10 @@ public sealed class ActivityInstructionExecutor
             throw new InvalidOperationException(
                 $"Agent {agent.Id.Value} inventory rejected reserved items.");
         if (item.IsDepleted) _world.RemoveItem(item.Id);
-        return ActivityInstructionResult.Succeeded;
+        return PlanInstructionResult.Succeeded;
     }
 
-    private ActivityInstructionResult ExecuteDamageObject(
+    private PlanInstructionResult ExecuteDamageObject(
         Agent agent,
         DamageObjectInstruction instruction)
     {
@@ -197,10 +197,10 @@ public sealed class ActivityInstructionExecutor
                 SimulationEventType.ObjectDestroyed,
                 result.Cell,
                 result.Type));
-        return ActivityInstructionResult.Succeeded;
+        return PlanInstructionResult.Succeeded;
     }
 
-    private ActivityInstructionResult ExecuteSupplyConstruction(
+    private PlanInstructionResult ExecuteSupplyConstruction(
         Agent agent,
         SupplyConstructionInstruction instruction)
     {
@@ -211,10 +211,10 @@ public sealed class ActivityInstructionExecutor
         if (site.State.SupplyFrom(agent.Inventory, instruction.Type) <= 0)
             throw new InvalidOperationException(
                 $"Agent {agent.Id.Value} supplied no {instruction.Type} to site {site.Id.Value}.");
-        return ActivityInstructionResult.Succeeded;
+        return PlanInstructionResult.Succeeded;
     }
 
-    private ActivityInstructionResult ExecuteAdvanceConstruction(
+    private PlanInstructionResult ExecuteAdvanceConstruction(
         Agent agent,
         AdvanceConstructionInstruction instruction)
     {
@@ -230,7 +230,7 @@ public sealed class ActivityInstructionExecutor
             _publish(new SimulationEvent(
                 SimulationEventType.ConstructionCompleted,
                 result.Cell));
-        return ActivityInstructionResult.Succeeded;
+        return PlanInstructionResult.Succeeded;
     }
 
 }

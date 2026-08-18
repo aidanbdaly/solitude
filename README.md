@@ -22,7 +22,7 @@ scene when play begins.
 - Plus/minus: simulation speed
 
 Destroyed flora drops wood, destroyed rock drops stone, and wall construction sites require
-16 wood. Colonists claim orders, navigate to their targets, collect construction
+16 wood. Colonists pursue orders, navigate to their targets, collect construction
 materials, and complete construction autonomously.
 
 ## Structure
@@ -35,8 +35,8 @@ materials, and complete construction autonomously.
 - `Domain/Game/Map`: grid, terrain, and spatial-math primitives
 - `Domain/Game/Agents`: agent state, GOAP planning, linear action plans, navigation, and simulation processes
 - `Domain/Game/Construction`: construction-site state and progress
-- `Domain/Game/Orders`: player and simulation orders, assignment state, and assignment lifecycle
-- `Domain/Game/Items`: inventory, item stacks, and reservations
+- `Domain/Game/Orders`: shared player and simulation goals and their target lifecycle
+- `Domain/Game/Items`: inventory, world items, item stacks, and collection
 - `Domain/Game/Objects`: placed flora, rock, and walls
 - `Domain/Game/Commands`: player-facing gameplay commands
 - `Domain/Game/Generation`: world generation and exact Unreal-compatible Perlin noise

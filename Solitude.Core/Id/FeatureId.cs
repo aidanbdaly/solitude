@@ -1,0 +1,1 @@
+public readonly record struct FeatureId(int Value);

@@ -1,0 +1,1 @@
+public readonly record struct AgentId(int Value);

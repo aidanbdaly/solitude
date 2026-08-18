@@ -53,10 +53,17 @@ public sealed class ConstructionState
 
     public bool IsRequirementSatisfied(ItemType type) => GetMissingCount(type) == 0;
 
-    public int SupplyFrom(Inventory source, ItemType type)
+    internal int SupplyFrom(
+        Inventory source,
+        ItemType type,
+        int maximumCount)
     {
+        if (maximumCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maximumCount));
         var missing = GetMissingCount(type);
-        return missing > 0 ? source.TransferTo(DeliveredMaterials, type, missing) : 0;
+        return missing > 0
+            ? source.TransferTo(DeliveredMaterials, type, Math.Min(missing, maximumCount))
+            : 0;
     }
 
     internal void Advance(int amount)

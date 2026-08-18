@@ -33,7 +33,7 @@ materials, and complete construction autonomously.
 - `Domain/Game`: state boundary, simulation orchestration, and simulation events
 - `Domain/Game/World`: world state and domain mutations, split into focused partial implementations
 - `Domain/Game/Map`: grid, terrain, and spatial-math primitives
-- `Domain/Game/Agents`: agent state, plans, navigation, and simulation processes
+- `Domain/Game/Agents`: agent state, GOAP planning, linear action plans, navigation, and simulation processes
 - `Domain/Game/Construction`: construction-site state and progress
 - `Domain/Game/Orders`: player and simulation orders, assignment state, and assignment lifecycle
 - `Domain/Game/Items`: inventory, item stacks, and reservations

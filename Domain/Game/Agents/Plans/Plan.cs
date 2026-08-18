@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Solitude.Domain.Game.Agents.Plans;
@@ -13,56 +14,49 @@ public enum PlanOutcome
 
 public sealed class Plan
 {
-    private readonly PlanStep[] _steps;
+    private readonly ImmutableArray<PlanAction> _actions;
 
-    public IReadOnlyList<PlanStep> Steps => _steps;
-    public int CurrentStep { get; internal set; }
-    public float InstructionTimeRemaining { get; internal set; }
-    public PlanStep Current => CurrentStep >= 0 && CurrentStep < _steps.Length
-        ? _steps[CurrentStep]
-        : throw new InvalidOperationException($"Plan current step {CurrentStep} is invalid.");
+    public IReadOnlyList<PlanAction> Actions => _actions;
+    public int CurrentActionIndex { get; private set; }
+    public bool CurrentActionStarted { get; private set; }
+    public float CurrentActionTimeRemaining { get; internal set; }
+    public bool IsComplete => CurrentActionIndex >= _actions.Length;
+    internal bool IsFresh =>
+        CurrentActionIndex == 0
+        && !CurrentActionStarted
+        && CurrentActionTimeRemaining == 0f;
+    public PlanAction CurrentAction => !IsComplete
+        ? _actions[CurrentActionIndex]
+        : throw new InvalidOperationException("A completed plan has no current action.");
 
-    public Plan(IEnumerable<PlanStep> steps)
+    public Plan(IEnumerable<PlanAction> actions)
     {
-        ArgumentNullException.ThrowIfNull(steps);
-        _steps = steps.ToArray();
-        if (_steps.Length == 0)
-            throw new ArgumentException("A plan requires at least one step.", nameof(steps));
-        ValidateTransitions();
+        ArgumentNullException.ThrowIfNull(actions);
+        _actions = actions.ToImmutableArray();
+        if (_actions.IsEmpty)
+            throw new ArgumentException("A plan requires at least one action.", nameof(actions));
+        if (_actions.Any(action => action is null))
+            throw new ArgumentException("A plan cannot contain a null action.", nameof(actions));
     }
 
-    internal void MoveToStep(int step)
+    internal void BeginCurrentAction()
     {
-        if (step < 0 || step >= _steps.Length)
-            throw new ArgumentOutOfRangeException(nameof(step));
-        CurrentStep = step;
-        InstructionTimeRemaining = 0f;
+        if (IsComplete)
+            throw new InvalidOperationException("A completed plan cannot begin another action.");
+        if (CurrentActionStarted)
+            throw new InvalidOperationException("The current plan action has already begun.");
+        CurrentActionStarted = true;
     }
 
-    private void ValidateTransitions()
+    internal void Advance()
     {
-        for (var index = 0; index < _steps.Length; index++)
-        {
-            ValidateTransition(index, _steps[index].OnSuccess);
-            ValidateTransition(index, _steps[index].OnFailure);
-        }
-    }
+        if (IsComplete)
+            throw new InvalidOperationException("A completed plan cannot advance.");
+        if (!CurrentActionStarted)
+            throw new InvalidOperationException("An unstarted plan action cannot succeed.");
 
-    private void ValidateTransition(int source, StepTransition transition)
-    {
-        if (transition is GoTo { Step: < 0 } invalid)
-            throw new ArgumentOutOfRangeException(nameof(transition), $"Step {source} transitions to invalid step {invalid.Step}.");
-
-        var target = transition switch
-        {
-            Next => source + 1,
-            GoTo goTo => goTo.Step,
-            Complete or Fail => -1,
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(transition), transition, "Unknown plan transition.")
-        };
-        if (target >= _steps.Length)
-            throw new ArgumentOutOfRangeException(
-                nameof(transition), $"Step {source} transitions outside the plan to step {target}.");
+        CurrentActionIndex++;
+        CurrentActionStarted = false;
+        CurrentActionTimeRemaining = 0f;
     }
 }

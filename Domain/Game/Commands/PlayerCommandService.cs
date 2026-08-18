@@ -21,7 +21,10 @@ public sealed class PlayerCommandService
         if (!_world.TryGetAgent(agentId, out var agent)
             || !_world.TryFindPath(agent.Cell, cell, PathGoalMode.ExactCell, out _)) return;
 
-        _world.ReplacePlan(agentId, PlanComposer.ComposeMove(cell));
+        _world.ReplacePlan(agentId, new Plan(new PlanAction[]
+        {
+            new MoveToAction(cell)
+        }));
     }
 
     public bool CanConstruct(Vector2I cell) => _world.CanPlaceConstruction(cell);

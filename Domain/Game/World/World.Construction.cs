@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Solitude.Domain.Game.Agents;
 using Solitude.Domain.Game.Construction;
 using Solitude.Domain.Game.Items;
 using Solitude.Domain.Game.Map;
@@ -65,6 +66,30 @@ public sealed partial class World
         _constructionSiteByCell.Remove(site.Cell);
         foreach (var material in site.State.GetDepositedMaterials())
             CreateItem(site.Cell, material.Type, material.Count);
+    }
+
+    public int SupplyConstructionMaterial(
+        ConstructionSiteId siteId,
+        AgentId agentId,
+        ItemType type,
+        int count)
+    {
+        if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+        var site = GetConstructionSite(siteId);
+        var agent = GetAgent(agentId);
+        if (site.State.GetMissingCount(type) < count)
+            throw new InvalidOperationException(
+                $"Construction site {siteId.Value} does not need {count} {type}.");
+        if (agent.Inventory.GetCount(type) < count)
+            throw new InvalidOperationException(
+                $"Agent {agentId.Value} does not have {count} {type}.");
+
+        var supplied = site.State.SupplyFrom(agent.Inventory, type, count);
+        if (supplied != count)
+            throw new InvalidOperationException(
+                $"Construction site {siteId.Value} accepted an unexpected material count.");
+        return supplied;
     }
 
     public ConstructionAdvanceResult AdvanceConstruction(ConstructionSiteId id, int amount)

@@ -1,19 +1,20 @@
 using System;
 using Solitude.Domain.Game.Agents;
+using Solitude.Domain.Game.Agents.Planning;
 using Solitude.Domain.Game.Commands;
 
 namespace Solitude.Domain.Game;
 
 public sealed class Simulation
 {
-    private const float DecisionStepSeconds = 0.15f;
+    private const float PlanningStepSeconds = 0.15f;
 
     private readonly MovementProcess _movement;
     private readonly NeedsProcess _needs;
-    private readonly DecisionProcess _decision;
+    private readonly PlanningProcess _planning;
     private readonly PlanExecutionProcess _planExecution;
     private readonly State _state;
-    private float _decisionAccumulator;
+    private float _planningAccumulator;
 
     public PlayerCommandService Commands { get; }
     public event Action<SimulationEvent>? EventOccurred;
@@ -23,9 +24,21 @@ public sealed class Simulation
         _state = state;
         ValidateState(state);
 
-        var executor = new PlanInstructionExecutor(state.World, Publish);
-        _planExecution = new PlanExecutionProcess(state.World, executor);
-        _decision = new DecisionProcess(state.World);
+        var projector = new PlanningStateProjector(state.World);
+        var model = new PlanningModel();
+        var actions = new PlanActionGenerator();
+        var planner = new Planner(model, actions);
+        var executor = new PlanActionExecutor(state.World, Publish);
+        _planExecution = new PlanExecutionProcess(
+            state.World,
+            projector,
+            model,
+            executor);
+        _planning = new PlanningProcess(
+            state.World,
+            projector,
+            new GoalEvaluator(),
+            planner);
         _movement = new MovementProcess(state.World);
         _needs = new NeedsProcess(state.World);
         Commands = new PlayerCommandService(state.World);
@@ -36,12 +49,12 @@ public sealed class Simulation
         _state.Clock.Advance(delta);
         _needs.Step(delta);
         _movement.Step(delta);
-        _decisionAccumulator += delta;
-        while (_decisionAccumulator >= DecisionStepSeconds)
+        _planningAccumulator += delta;
+        while (_planningAccumulator >= PlanningStepSeconds)
         {
-            _decisionAccumulator -= DecisionStepSeconds;
-            _decision.Step();
-            _planExecution.Step(DecisionStepSeconds);
+            _planningAccumulator -= PlanningStepSeconds;
+            _planning.Step();
+            _planExecution.Step(PlanningStepSeconds);
         }
     }
 

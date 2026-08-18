@@ -9,6 +9,8 @@ public sealed partial class World
     public void StartPlan(AgentId agentId, Plan plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        if (!plan.IsFresh)
+            throw new ArgumentException("Only a fresh plan can be started.", nameof(plan));
         var agent = GetAgent(agentId);
         if (agent.Plan is not null)
             throw new InvalidOperationException(
@@ -19,6 +21,8 @@ public sealed partial class World
     public void ReplacePlan(AgentId agentId, Plan plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
+        if (!plan.IsFresh)
+            throw new ArgumentException("Only a fresh plan can replace another plan.", nameof(plan));
         var agent = GetAgent(agentId);
         if (agent.Plan is not null)
             FinishPlan(agentId, PlanOutcome.Cancelled);
@@ -39,7 +43,6 @@ public sealed partial class World
         if (plan is null) return;
 
         agent.Navigation.Reset();
-        plan.InstructionTimeRemaining = 0f;
         TryReleaseItemReservationForAgent(agentId);
 
         if (TryGetOrderAssignmentForAgent(agentId, out _))

@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class MenuScreen : Control
+public partial class MenuScene : Control
 {
     [Signal] public delegate void BeginRequestedEventHandler();
 

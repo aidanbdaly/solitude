@@ -6,9 +6,9 @@ public static class SimulationConstant
     public const float TileResolutionPX = 32f;
 }
 
-public partial class SimulationService(SimulationState State) : GodotObject
+public partial class SimulationService(GameState State) : GodotObject
 {
-    private readonly SimulationState _state = State;
+    private readonly GameState _state = State;
 
     public void TogglePause() { _state.Paused = !_state.Paused; }
 

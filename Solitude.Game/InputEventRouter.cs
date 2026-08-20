@@ -21,7 +21,7 @@ public class InputEventRouter
 
     public void Route(InputEvent inputEvent)
     {
-        var direction = Godot.Input.GetVector(MoveLeftAction, MoveRightAction, MoveUpAction, MoveDownAction);
+        var direction = Input.GetVector(MoveLeftAction, MoveRightAction, MoveUpAction, MoveDownAction);
 
         if (direction != Vector2.Zero)
         {

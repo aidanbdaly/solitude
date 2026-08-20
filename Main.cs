@@ -1,11 +1,8 @@
 using Godot;
 using System;
+
 using System.Linq;
-using Solitude.Domain.Game;
-using Solitude.Domain.Game.Agents;
-using Solitude.Domain.Game.Generation;
-using Solitude.Nodes.Game;
-using Solitude.Nodes.Menu;
+using System.Text.Json;
 
 namespace Solitude;
 
@@ -14,36 +11,64 @@ public partial class Main : Node
     [Export] public PackedScene MenuScene { get; set; } = null!;
     [Export] public PackedScene GameScene { get; set; } = null!;
 
-    private readonly WorldGenerator _worldGenerator = new();
     private Node? _currentScreen;
 
     public override void _Ready()
     {
         GetWindow().Title = "Solitude";
-        if (OS.GetCmdlineUserArgs().Contains("--skip-menu")) StartNewGame();
+        if (OS.GetCmdlineUserArgs().Contains("--skip-menu")) NewGame();
         else ShowMenu();
     }
 
     private void ShowMenu()
     {
-        var menu = MenuScene.Instantiate<MenuScreen>();
-        menu.BeginRequested += StartNewGame;
+        var menu = MenuScene.Instantiate<MenuScene>();
+
+        menu.NewGameRequested += NewGame;
+        menu.LoadGameRequested += LoadGame;
+
         ReplaceScreen(menu);
     }
 
-    private void StartNewGame()
+    private void LoadGame(string savePath)
     {
-        var state = _worldGenerator.Generate(
-            WorldGeneratorParameters.Default,
-            Random.Shared.Next(),
-            AgentDefinition.Colonist);
-        ShowGame(state);
+        if (!FileAccess.FileExists(savePath))
+        {
+            throw new Exception("The save file could not be found");
+        }
+
+        // revert tree
+
+        using var saveFile = FileAccess.Open(savePath, FileAccess.ModeFlags.Read)
+            ?? throw new Exception($"Error opening save file: {FileAccess.GetOpenError()}");
+
+        GameState save = JsonSerializer.Deserialize<GameState>(saveFile.GetAsText())
+            ?? throw new Exception("The save file is corrupted");
+
+        var game = GameScene.Instantiate<GameScene>();
+
+        game.Set("State", save);
+
+        ReplaceScreen(game);
     }
 
-    private void ShowGame(State state)
+    private void NewGame(string savePath, GameDefinition definition)
     {
-        var game = GameScene.Instantiate<GameNode>();
-        game.Initialize(state);
+        if (FileAccess.FileExists(savePath))
+        {
+            throw new Exception("The save file already exists");
+        }
+
+        GameState save = definition.ToState();
+
+        using var saveFile = FileAccess.Open(savePath, FileAccess.ModeFlags.Write);
+
+        saveFile.StoreString(JsonSerializer.Serialize(save));
+
+        var game = GameScene.Instantiate<GameScene>();
+
+        game.Set("State", save);
+
         ReplaceScreen(game);
     }
 

@@ -12,11 +12,11 @@ public class InputEventRouter
     private static readonly StringName ZoomInAction = "camera_zoom_in";
     private static readonly StringName ZoomOutAction = "camera_zoom_out";
 
-    private readonly PlayerService _player;
+    private readonly GameService _game;
 
-    public InputEventRouter(PlayerService player)
+    public InputEventRouter(GameService game)
     {
-        _player = player;
+        _game = game;
     }
 
     public void Route(InputEvent inputEvent)
@@ -25,29 +25,29 @@ public class InputEventRouter
 
         if (direction != Vector2.Zero)
         {
-            _player.Pan(direction);
+            _game.Pan(direction);
         }
 
         if (inputEvent.IsActionPressed(ZoomInAction))
         {
-            _player.ZoomIn();
+            _game.ZoomIn();
         }
 
         else if (inputEvent.IsActionPressed(ZoomOutAction))
         {
-            _player.ZoomOut();
+            _game.ZoomOut();
         }
 
         else if (inputEvent is InputEventMouseMotion motion && motion.ButtonMask.HasFlag(MouseButtonMask.Middle))
         {
-            _player.PanRelatve(motion.Relative);
+            _game.PanRelatve(motion.Relative);
         }
 
         if (inputEvent is InputEventKey { Echo: true }) return;
 
-        if (inputEvent.IsActionPressed(PauseAction)) _player.TogglePause();
-        else if (inputEvent.IsActionPressed(FasterAction)) _player.SetTimeStep(prev => prev + 1);
-        else if (inputEvent.IsActionPressed(SlowerAction)) _player.SetTimeStep(prev => prev - 1);
+        if (inputEvent.IsActionPressed(PauseAction)) _game.TogglePause();
+        else if (inputEvent.IsActionPressed(FasterAction)) _game.SetTimeStep(prev => prev + 1);
+        else if (inputEvent.IsActionPressed(SlowerAction)) _game.SetTimeStep(prev => prev - 1);
     }
 
 }

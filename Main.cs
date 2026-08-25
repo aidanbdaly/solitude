@@ -25,7 +25,6 @@ public partial class Main : Node
         var menu = MenuScene.Instantiate<MenuScene>();
 
         menu.NewGameRequested += NewGame;
-        menu.LoadGameRequested += LoadGame;
 
         ReplaceScreen(menu);
     }
@@ -52,7 +51,7 @@ public partial class Main : Node
         ReplaceScreen(game);
     }
 
-    private void NewGame(string savePath, GameDefinition definition)
+    private void NewGame(string savePath, GameParameters definition)
     {
         if (FileAccess.FileExists(savePath))
         {

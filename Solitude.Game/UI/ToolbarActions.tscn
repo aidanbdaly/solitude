@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://Solitude.Game/UI/ToolbarActionsComponent.cs" id="1_script"]
+[ext_resource type="Theme" path="res://Solitude.Game/UI/HudTheme.tres" id="2_theme"]
+
+[sub_resource type="ButtonGroup" id="ToolGroup"]
+resource_local_to_scene = true
+
+[node name="Actions" type="HBoxContainer"]
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudButtonRow"
+script = ExtResource("1_script")
+
+[node name="Command" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(88, 34)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"HudButton"
+toggle_mode = true
+button_group = SubResource("ToolGroup")
+text = "Command"
+tooltip_text = "Select and move colonists · 1"
+
+[node name="Construct" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(84, 34)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"HudButton"
+toggle_mode = true
+button_group = SubResource("ToolGroup")
+text = "Construct"
+tooltip_text = "Place wall construction site · 2"
+
+[node name="Damage" type="Button" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 34)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"HudButton"
+toggle_mode = true
+button_group = SubResource("ToolGroup")
+text = "Damage"
+tooltip_text = "Damage object · 3"

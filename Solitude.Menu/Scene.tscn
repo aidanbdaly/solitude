@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://Nodes/Menu/MenuScreen.cs" id="1_menu"]
+[ext_resource type="Script" path="res://Solitude.Menu/MenuScene.cs" id="1_menu"]
 [ext_resource type="Texture2D" path="res://Assets/Menu/Textures/menu_logo.png" id="2_logo"]
 [ext_resource type="AudioStream" path="res://Assets/Menu/Audio/menu_theme.wav" id="3_music"]
 [ext_resource type="AudioStream" path="res://Assets/Menu/Audio/button_click.wav" id="4_click"]
@@ -88,12 +88,19 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="Begin" type="Button" parent="Buttons"]
+[node name="New" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(270, 52)
 layout_mode = 2
 theme_override_styles/normal = SubResource("ButtonStyle")
 theme_override_font_sizes/font_size = 20
-text = "Begin"
+text = "New Game"
+
+[node name="Load" type="Button" parent="Buttons"]
+custom_minimum_size = Vector2(270, 52)
+layout_mode = 2
+theme_override_styles/normal = SubResource("ButtonStyle")
+theme_override_font_sizes/font_size = 20
+text = "Load Game"
 
 [node name="Quit" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(270, 52)

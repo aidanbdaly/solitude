@@ -18,8 +18,6 @@ scene when play begins.
 - Left click: use the active tool
 - Right click: move the selected colonist in Command mode
 - 1-3: Command, Construct, Damage
-- Space: pause
-- Plus/minus: simulation speed
 
 Destroyed flora drops wood, destroyed rock drops stone, and wall construction sites require
 16 wood. Colonists pursue orders, navigate to their targets, collect construction

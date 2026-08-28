@@ -1,0 +1,59 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Solitude.Game/UI/ToolbarComponent.cs" id="1_script"]
+[ext_resource type="Theme" path="res://Solitude.Game/UI/HudTheme.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://Solitude.Game/UI/ToolbarTime.tscn" id="3_time"]
+[ext_resource type="PackedScene" path="res://Solitude.Game/UI/ToolbarActions.tscn" id="4_actions"]
+[ext_resource type="PackedScene" path="res://Solitude.Game/UI/ToolbarPlayback.tscn" id="5_playback"]
+
+[node name="Toolbar" type="PanelContainer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -44.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudToolbar"
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_type_variation = &"HudToolbarMargin"
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_type_variation = &"HudToolbarRow"
+
+[node name="Time" parent="Margin/Row" instance=ExtResource("3_time")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TimeDivider" type="ColorRect" parent="Margin/Row"]
+custom_minimum_size = Vector2(1, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.2039, 0.2353, 0.2745, 1)
+
+[node name="Actions" parent="Margin/Row" instance=ExtResource("4_actions")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PlaybackDivider" type="ColorRect" parent="Margin/Row"]
+custom_minimum_size = Vector2(1, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.2039, 0.2353, 0.2745, 1)
+
+[node name="Playback" parent="Margin/Row" instance=ExtResource("5_playback")]
+unique_name_in_owner = true
+layout_mode = 2

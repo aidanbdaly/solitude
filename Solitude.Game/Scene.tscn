@@ -1,30 +1,31 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
-[ext_resource type="Script" path="res://Nodes/Game/GameNode.cs" id="1_game"]
-[ext_resource type="PackedScene" path="res://Nodes/Game/map_node.tscn" id="2_map"]
-[ext_resource type="Script" path="res://Nodes/Game/CursorNode.cs" id="3_cursor"]
-[ext_resource type="PackedScene" path="res://Solitude.Game/Solitude.Game.UI/Hud.tscn" id="4_hud"]
-[ext_resource type="AudioStream" path="res://Assets/Game/Audio/harvest_work.wav" id="6_harvest_work"]
-[ext_resource type="AudioStream" path="res://Assets/Game/Audio/mine_work.wav" id="7_mine_work"]
-[ext_resource type="AudioStream" path="res://Assets/Game/Audio/harvest_complete.wav" id="8_harvest_complete"]
-[ext_resource type="AudioStream" path="res://Assets/Game/Audio/mine_complete.wav" id="9_mine_complete"]
+[ext_resource type="Script" path="res://Solitude.Game/GameScene.cs" id="1_game"]
+[ext_resource type="Script" path="res://Solitude.Game/Node/MapNode.cs" id="2_map"]
+[ext_resource type="Script" path="res://Solitude.Game/Node/Camera.cs" id="3_camera"]
+[ext_resource type="PackedScene" path="res://Solitude.Game/UI/Card.tscn" id="4_card"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/tile_atlas_padded.png" id="5_tiles"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/vegetation_atlas.png" id="6_features"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/item_atlas.png" id="7_items"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/agent_atlas.png" id="8_agents"]
+[ext_resource type="PackedScene" path="res://Solitude.Game/UI/Toolbar.tscn" id="9_toolbar"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1_game")
-FloraDamageSound = ExtResource("6_harvest_work")
-RockDamageSound = ExtResource("7_mine_work")
-FloraDestroyedSound = ExtResource("8_harvest_complete")
-RockDestroyedSound = ExtResource("9_mine_complete")
-ConstructionCompletedSound = ExtResource("8_harvest_complete")
 
-[node name="Map" parent="." instance=ExtResource("2_map")]
+[node name="Map" type="Node2D" parent="."]
+script = ExtResource("2_map")
+TileAtlas = ExtResource("5_tiles")
+FeatureAtlas = ExtResource("6_features")
+ItemAtlas = ExtResource("7_items")
+AgentAtlas = ExtResource("8_agents")
 
-[node name="Cursor" type="Node2D" parent="."]
-script = ExtResource("3_cursor")
+[node name="Camera" type="Camera2D" parent="Map"]
+script = ExtResource("3_camera")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
 
-[node name="Hud" parent="UI" instance=ExtResource("4_hud")]
+[node name="Card" parent="UI" instance=ExtResource("4_card")]
 
-[node name="WorldSounds" type="AudioStreamPlayer" parent="."]
+[node name="Toolbar" parent="UI" instance=ExtResource("9_toolbar")]

@@ -31,6 +31,19 @@ Mutable entities and implementation containers do need snapshot representations.
 `Agent`, `Item`, `Map`, `World`, `Grid<T>`, and `SparseGrid<T>` must not be serialized
 directly.
 
+## Indexes and identity
+
+- Agent and item IDs are stable `long` values. They may be sparse, are never list
+  offsets, and are not reused.
+- `World` owns ID-keyed entity dictionaries and reverse address indexes.
+- Maps own only the forward spatial indexes from coordinate to entity. A global
+  entity ID must never index storage sized from map dimensions.
+- Map placement records are the authoritative persisted location data. Entity
+  dictionaries, reverse address indexes, and occupancy indexes are rebuilt and
+  validated from those records during restoration rather than serialized.
+- Restoration creates canonical entities first, then resolves placement IDs and
+  rejects duplicate, missing, or multiply placed entities.
+
 ## Top-level schema
 
 Keep the related snapshot records together in one `SaveSchema.cs` file initially;

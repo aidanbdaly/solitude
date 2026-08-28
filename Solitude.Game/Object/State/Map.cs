@@ -30,8 +30,6 @@ public sealed class Map(uint width, uint height)
 
     private readonly SparseGrid<Agent> _agent = new(width, height);
 
-    private readonly Vector2I?[] _agentMapCoordinate = new Vector2I?[checked((int)((ulong)width * height))];
-
     public IReadOnlyGrid<Tile> Tile => _tile;
 
     public IReadOnlySparseGrid<Feature> Feature => _feature;
@@ -79,22 +77,16 @@ public sealed class Map(uint width, uint height)
         => Release(_item, coordinate);
 
     public void SetAgent(Agent agent, Vector2I coordinate)
-    {
-        Occupy(_agent, coordinate, agent);
-        _agentMapCoordinate[agent.Id] = coordinate;
-    }
+        => Occupy(_agent, coordinate, agent);
 
-    public void RemoveAgent(Agent agent)
+    public void RemoveAgent(Agent agent, Vector2I coordinate)
     {
-        if (_agentMapCoordinate[agent.Id] is Vector2I coordinate)
+        if (!ReferenceEquals(_agent.Get(coordinate), agent))
         {
-            Release(_agent, coordinate);
-            _agentMapCoordinate[agent.Id] = null;
+            throw new InvalidOperationException($"Agent '{agent.Id}' is not present at coordinate '{coordinate}'");
         }
-        else
-        {
-            throw new InvalidOperationException("Call to RemoveAgent() failed: Agent is not present on map");
-        }
+
+        Release(_agent, coordinate);
     }
 
     public void SetItemAggregate(ItemAggregate aggregate, Vector2I coordinate)

@@ -7,52 +7,64 @@ public readonly record struct WorldAddress(
     Vector2I MapCoordinate
 );
 
-public sealed partial class World(uint width, uint height) : Resource
+public sealed class World(uint width, uint height)
 {
-    private int _nextAgentId = -1;
-    private int _nextItemId = -1;
+    private long _nextAgentId;
 
-    private readonly List<Agent> _agent = [];
-    private readonly List<Vector2I> _agentWorldCoordinate = [];
+    private readonly Dictionary<long, Agent> _agent = [];
+    private readonly Dictionary<long, WorldAddress> _agentAddress = [];
 
-    private readonly List<Item> _item = [];
-    private readonly List<Vector2I> _itemWorldCoordinate = [];
-    
+    private readonly Dictionary<long, Item> _item = [];
+    private readonly Dictionary<long, WorldAddress> _itemAddress = [];
+
     private readonly SparseGrid<Map> _map = new(width, height);
 
-    public void CreateAgent(AgentDefinition definition, WorldAddress address)
+    public long CreateAgent(AgentDefinition definition, WorldAddress address)
     {
-        _agent[_nextAgentId] = new()
+        var map = GetMap(address.WorldCoordinate);
+
+        var agentId = _nextAgentId;
+        var agent = new Agent
         {
-            Id = _nextAgentId++,
+            Id = agentId,
             Definition = definition,
             Status = AgentStatus.Default,
             Inventory = new()
         };
 
-        SetAgentAddress(_nextAgentId, address);
+        map.SetAgent(agent, address.MapCoordinate);
+        _agent.Add(agentId, agent);
+        _agentAddress.Add(agentId, address);
+        _nextAgentId++;
+
+        return agentId;
     }
 
-    public void SetAgentAddress(int agentId, WorldAddress address)
+    public void MoveAgent(long agentId, WorldAddress address)
     {
-        var map = _map.Get(address.WorldCoordinate) ??
-            throw new InvalidOperationException("Call to SetAgentMap() failed: Cannot bind an agent to an ungenerated map");
+        if (!_agent.TryGetValue(agentId, out var agent) ||
+            !_agentAddress.TryGetValue(agentId, out var previousAddress))
+        {
+            throw new InvalidOperationException($"Cannot move unknown agent '{agentId}'");
+        }
 
-        map.SetAgent(_agent[agentId], address.MapCoordinate);
+        if (previousAddress == address)
+        {
+            return;
+        }
 
-        _agentWorldCoordinate[agentId] = address.WorldCoordinate;
+        var destinationMap = GetMap(address.WorldCoordinate);
+        var previousMap = GetMap(previousAddress.WorldCoordinate);
+
+        previousMap.RemoveAgent(agent, previousAddress.MapCoordinate);
+        destinationMap.SetAgent(agent, address.MapCoordinate);
+
+        _agentAddress[agentId] = address;
     }
 
     public void CreateMap(MapStyle style, Vector2I worldCoordinate)
     {
-        if (_map.Get(worldCoordinate) is not null)
-        {
-            throw new InvalidOperationException("Call to CreateMap() failed: Map already exists at coordinate");
-        }
-
-        Map map = Map.Generate(style);
-
-        _map.Set(worldCoordinate, map);
+        _map.Set(worldCoordinate, Map.Generate(style));
     }
 
     public Map GetMap(Vector2I worldCoordinate)

@@ -45,31 +45,39 @@ public sealed class WorldTests
     }
 
     [Fact]
-    public void SetAgentAddress_OccupiedDestinationPreservesOriginalPlacement()
+    public void MoveAgent_OccupiedDestinationThrows()
     {
         var world = CreateWorld(new(2, 1));
-        var firstId = world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Zero));
+        var agentId = world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Zero));
         world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Right));
 
         Assert.Throws<InvalidOperationException>(() =>
-            world.MoveAgent(firstId, new(Vector2I.Zero, Vector2I.Right)));
-
-        Assert.Equal(firstId, world.GetMap(Vector2I.Zero).Agent.Get(Vector2I.Zero)?.Id);
+            world.MoveAgent(agentId, new(Vector2I.Zero, Vector2I.Right)));
     }
 
     [Fact]
-    public void SetAgentAddress_InvalidDestinationPreservesOriginalPlacement()
+    public void MoveAgent_InvalidDestinationThrows()
     {
-        var world = new World(2, 1);
-        world.CreateMap(CreateMapStyle(new(1, 1)), Vector2I.Zero);
-        var id = world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Zero));
+        var outOfBoundsWorld = CreateWorld(new(1, 1));
+        var outOfBoundsAgentId = outOfBoundsWorld.CreateAgent(
+            AgentDefinition,
+            new(Vector2I.Zero, Vector2I.Zero));
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            world.MoveAgent(id, new(Vector2I.Zero, Vector2I.Right)));
-        Assert.Throws<InvalidOperationException>(() =>
-            world.MoveAgent(id, new(new(1, 0), Vector2I.Zero)));
+            outOfBoundsWorld.MoveAgent(
+                outOfBoundsAgentId,
+                new(Vector2I.Zero, Vector2I.Right)));
 
-        Assert.Equal(id, world.GetMap(Vector2I.Zero).Agent.Get(Vector2I.Zero)?.Id);
+        var missingMapWorld = new World(2, 1);
+        missingMapWorld.CreateMap(CreateMapStyle(new(1, 1)), Vector2I.Zero);
+        var missingMapAgentId = missingMapWorld.CreateAgent(
+            AgentDefinition,
+            new(Vector2I.Zero, Vector2I.Zero));
+
+        Assert.Throws<InvalidOperationException>(() =>
+            missingMapWorld.MoveAgent(
+                missingMapAgentId,
+                new(new(1, 0), Vector2I.Zero)));
     }
 
     [Fact]

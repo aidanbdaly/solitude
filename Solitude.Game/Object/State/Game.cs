@@ -6,7 +6,7 @@ public sealed class MapChangedEvent : EventArgs
     public required Map NewMap { get; init; }
 }
 
-public sealed partial class Game(uint worldWidth, uint worldHeight) : Resource
+public sealed partial class Game(uint worldWidth, uint worldHeight)
 {
     public event EventHandler<MapChangedEvent>? MapChanged;
 

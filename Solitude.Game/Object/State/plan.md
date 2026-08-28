@@ -2,164 +2,172 @@
 
 ## Goal
 
-Keep the runtime model encapsulated and serialize an explicit, versioned snapshot of
-its durable state. Runtime events, caches, Godot nodes, derived occupancy data, and
-simulation services are not part of the save format.
+Serialize an explicit, versioned snapshot of the durable state owned by `Game`,
+`World`, and `Map`. Keep runtime models encapsulated and exclude events, Godot
+nodes, caches, derived occupancy, and other runtime-only indexes.
 
-`Game`, `World`, and `Map` remain behavioural domain objects. They create snapshots
-for saving and reconstruct themselves from validated snapshots when loading.
+The save schema mirrors the current state model without serializing its private
+implementation containers directly.
 
-## Reusing existing types
+## Current ownership model
 
-An existing type can appear directly in the save schema when all of the following
-are true:
+- `Game` owns an empty `Player`, one `World`, and an optional active world
+  coordinate.
+- `World` owns its dimensions, maps, canonical agents, canonical items, the next
+  agent ID, and agent/item address indexes.
+- `Map` owns its dimensions, time, dense tiles, and sparse feature, work, item,
+  aggregate, and agent layers.
+- Agents own an immutable `AgentDefinition`, an init-only `AgentStatus`, and a
+  mutable `AgentInventory`.
+- Items are world-owned entities identified by stable `long` IDs; maps contain
+  references to them.
+- Features, work, and item aggregates are map-owned values and do not have IDs.
+- `AgentNavigation` is not currently attached to an agent and is therefore not
+  part of the save graph.
 
-- It is an immutable value or definition rather than a mutable entity.
-- Every member is intentionally part of the durable file format.
-- Its members are themselves persistence-safe.
-- Its serialized shape can be kept compatible or migrated when it changes.
+## Schema
 
-This means a separate `AgentDefinitionSave` is not required. `AgentDefinition` can
-be stored directly after its public fields are changed to `required` `init`
-properties so that it is actually immutable after construction.
-
-The same approach applies to small value types such as `Tile`, `ItemRequirement`,
-`MapId`, `WorldAddress`, and the enum types. Numeric enum values must remain stable;
-otherwise the schema should serialize explicit string or numeric codes instead.
-
-Mutable entities and implementation containers do need snapshot representations.
-`Agent`, `Item`, `Map`, `World`, `Grid<T>`, and `SparseGrid<T>` must not be serialized
-directly.
-
-## Indexes and identity
-
-- Agent and item IDs are stable `long` values. They may be sparse, are never list
-  offsets, and are not reused.
-- `World` owns ID-keyed entity dictionaries and reverse address indexes.
-- Maps own only the forward spatial indexes from coordinate to entity. A global
-  entity ID must never index storage sized from map dimensions.
-- Map placement records are the authoritative persisted location data. Entity
-  dictionaries, reverse address indexes, and occupancy indexes are rebuilt and
-  validated from those records during restoration rather than serialized.
-- Restoration creates canonical entities first, then resolves placement IDs and
-  rejects duplicate, missing, or multiply placed entities.
-
-## Top-level schema
-
-Keep the related snapshot records together in one `SaveSchema.cs` file initially;
-there is no need for one file per record.
+Keep the related records together in `Snapshots.cs` under the
+`Solitude.Persistence` namespace. Use persistence-only coordinates so the JSON
+contract does not depend on Godot's representation of `Vector2I`.
 
 ```csharp
-public sealed record GameSave(
-    int Version,
-    PlayerSave Player,
-    WorldSave World,
-    MapId? ActiveMapId);
+namespace Solitude.Persistence;
 
-public sealed record WorldSave(
+public readonly record struct Coordinate(int X, int Y);
+
+public sealed record GameSnapshot(
+    int Version,
+    WorldSnapshot World,
+    Coordinate? ActiveWorldCoordinate);
+
+public sealed record WorldSnapshot(
     uint Width,
     uint Height,
     long NextAgentId,
     long NextItemId,
-    IReadOnlyList<AgentSave> Agents,
-    IReadOnlyList<ItemSave> Items,
-    IReadOnlyList<MapSave> Maps);
+    IReadOnlyList<AgentSnapshot> Agents,
+    IReadOnlyList<ItemSnapshot> Items,
+    IReadOnlyList<MapSnapshot> Maps);
 
-public sealed record MapSave(
-    MapId Id,
+public sealed record MapSnapshot(
+    Coordinate WorldCoordinate,
     int Width,
     int Height,
     uint Time,
     IReadOnlyList<Tile> Tiles,
-    IReadOnlyList<PlacedFeatureSave> Features,
-    IReadOnlyList<PlacedWorkSave> Work,
-    IReadOnlyList<PlacedItemSave> Items,
-    IReadOnlyList<PlacedItemAggregateSave> ItemAggregates,
-    IReadOnlyList<PlacedAgentSave> Agents);
-```
+    IReadOnlyList<FeaturePlacement> Features,
+    IReadOnlyList<WorkPlacement> Work,
+    IReadOnlyList<ItemPlacement> Items,
+    IReadOnlyList<ItemAggregatePlacement> ItemAggregates,
+    IReadOnlyList<AgentPlacement> Agents);
 
-`PlayerSave` can remain empty or be omitted from `GameSave` until `Player` contains
-durable state.
-
-## Entity snapshots
-
-World-owned entities are serialized once. Map placement records refer to their IDs
-instead of embedding duplicate object graphs.
-
-```csharp
-public sealed record AgentSave(
+public sealed record AgentSnapshot(
     long Id,
     AgentDefinition Definition,
-    AgentStatusSave Status,
-    InventorySave Inventory);
+    AgentStatus Status,
+    IReadOnlyList<ItemCount> Inventory);
 
-public sealed record ItemSave(
-    long Id,
-    ItemType Type,
-    int Count);
+public sealed record ItemSnapshot(long Id, ItemType Type, int Count);
+public sealed record ItemCount(ItemType Type, int Count);
 
-public sealed record PlacedAgentSave(Vector2I Coordinate, long AgentId);
-public sealed record PlacedItemSave(Vector2I Coordinate, long ItemId);
-public sealed record PlacedFeatureSave(Vector2I Coordinate, FeatureType Type);
+public sealed record AgentPlacement(Coordinate Coordinate, long AgentId);
+public sealed record ItemPlacement(Coordinate Coordinate, long ItemId);
+public sealed record FeaturePlacement(Coordinate Coordinate, FeatureType Type);
+
+public sealed record WorkPlacement(
+    Coordinate Coordinate,
+    int Required,
+    int Current);
+
+public sealed record ItemAggregatePlacement(
+    Coordinate Coordinate,
+    IReadOnlyList<ItemRequirement> Required,
+    IReadOnlyList<ItemCount> Contents);
 ```
 
-`AgentStatusSave` and `InventorySave` represent mutable runtime state. If
-`AgentStatus` is deliberately converted into an immutable value object with a
-stable persistence contract, it may replace `AgentStatusSave` directly.
+`Player` is omitted until it contains durable state. `AgentDefinition`,
+`AgentStatus`, `Tile`, and `ItemRequirement` can be reused because their current
+public state is immutable after construction and intentionally belongs in the save
+contract. Mutable inventory and aggregate dictionaries become item-count lists so
+duplicate keys and invalid counts can be validated explicitly.
 
-Work and item aggregates need records containing their actual mutable progress and
-contents, not only their public read-only projections. Their exact records should
-be finalized when mutation operations for those types are implemented.
+Items are included in version 1 because `World` owns their allocation, stable IDs,
+canonical instances, and placements. The `Snapshot` suffix is reserved for captures
+of mutable domain objects; structural values and placements use ordinary nouns.
 
-## Grid representation
+## Identity, indexes, and grids
 
-- Store the dense tile grid as a row-major `Tiles` list with exactly
-  `Width * Height` entries.
-- Store sparse layers as coordinate/value placement lists.
-- Do not save `_occupation`; rebuild it from feature, work, item, aggregate, and
-  agent placements while restoring the map.
-- Validate all coordinates, duplicate placements, tile counts, IDs, and references
-  before constructing the runtime model.
-
-`Vector2I` should use a small explicit JSON converter or be replaced at the schema
-boundary by a stable coordinate record such as `CellSave(int X, int Y)`. Do not rely
-on Godot's internal JSON representation as the save-file contract.
+- Agent and item IDs are stable `long` values and are never interpreted as list
+  offsets.
+- Canonical agents and items are serialized once; map placements refer to IDs.
+- Map placement records are the authoritative persisted location data.
+- World address dictionaries and map occupancy are rebuilt from placements and are
+  not serialized independently.
+- Restore canonical entities before resolving placements. Reject duplicate IDs,
+  missing references, multiple placements for one entity, duplicate coordinates,
+  and coordinates outside their map or world bounds.
+- Persist tiles in row-major order with exactly `Width * Height` entries.
+- Persist sparse layers as coordinate/value placement lists.
+- Persist `NextAgentId` and `NextItemId` so deleted or sparse IDs are not reused;
+  require each counter to be greater than every corresponding restored ID.
 
 ## Conversion boundary
 
-Add snapshot operations to the aggregate roots and relevant contained types:
+Add snapshot operations at the aggregate boundaries:
 
 ```csharp
-public GameSave CreateSave();
-public static Game Restore(GameSave save);
+public GameSnapshot CreateSnapshot();
+internal static Game Restore(GameSnapshot snapshot);
 ```
 
-`World` and `Map` should have corresponding internal `CreateSave` and `Restore`
-operations. Restore methods should populate private fields through constructors or
-controlled internal methods; they should not expose mutable collections publicly.
+`World` and `Map` should have corresponding internal snapshot and restore
+operations. They may access their own private collections but must not expose those
+collections publicly merely for serialization.
 
-`Save.Write` serializes `game.CreateSave()`. `Save.Read` deserializes `GameSave`,
-checks `Version`, validates it, and calls `Game.Restore(save)`.
+Restoration should:
 
-## Versioning and validation
+1. Validate schema version, dimensions, counts, IDs, and coordinates.
+2. Construct the world and each empty map.
+3. Restore dense tiles and map-owned feature, work, and aggregate values.
+4. Restore canonical agents and items into the world dictionaries.
+5. Resolve item and agent placement IDs, populate map grids, and rebuild address
+   and occupancy indexes.
+6. Validate and restore the active world coordinate without emitting runtime
+   change events.
 
-- Start with schema version `1`.
-- Reject unsupported future versions with a clear error.
-- Add explicit migrations when an older schema can be upgraded safely.
-- Reject negative counts, invalid dimensions, duplicate IDs, missing entity
-  references, invalid active-map IDs, and out-of-bounds coordinates.
-- Recalculate next IDs from the maximum restored IDs, or validate persisted next-ID
-  values before accepting them.
-- Never serialize events or restore event subscribers.
+`Save.Write` serializes `game.CreateSnapshot()`. `Save.Read` deserializes
+`GameSnapshot`, validates version `1`, and calls `Game.Restore(snapshot)`. Opening
+either read or write files must be checked before dereferencing the Godot
+`FileAccess` result.
+
+## Validation and tests
+
+- Reject unsupported versions, zero or oversized dimensions, tile-count
+  mismatches, negative item/work counts, work progress above its requirement,
+  duplicate IDs, invalid next IDs, missing placement references, duplicate or
+  multiply occupied coordinates, and invalid active-map coordinates.
+- Add a complete round-trip test containing time, non-default tiles, features,
+  work progress, an aggregate with contents, agents with inventory/status, items,
+  and placements across more than one map.
+- Add malformed-save tests for every structural validation category.
+- Verify restored objects are canonical: a placed agent/item is the same object
+  stored in the world's ID dictionary.
+- Add a migration test before introducing schema version `2`.
 
 ## Implementation order
 
-1. Make reusable definition/value types genuinely immutable and confirm their JSON
-   representation.
-2. Add `SaveSchema.cs` and a converter for coordinates.
-3. Implement snapshots and restoration for inventory, agents, and items.
-4. Implement map snapshots, sparse placements, and occupancy reconstruction.
-5. Implement world and game snapshots.
-6. Change `Save.Read` and `Save.Write` to use `GameSave`.
-7. Add round-trip tests and malformed-save validation tests.
-8. Add at least one version-migration test before changing version `1`.
+1. Add the schema records and coordinate conversions.
+2. Implement map snapshots and restoration.
+3. Implement world entity snapshots, placement resolution, and index rebuilding.
+4. Implement `Game.CreateSnapshot` and `Game.Restore`.
+5. Switch `Save.Read` and `Save.Write` to the versioned schema.
+6. Add round-trip and malformed-save tests.
+
+## Remaining implementation work
+
+- Add controlled restoration paths that can insert known agent/item IDs and set
+  `_nextAgentId` and `_nextItemId` without using normal creation commands.
+- Add a private restoration constructor or factory path that lets `Game` receive a
+  restored `World` and active coordinate instead of always constructing a new,
+  empty world through its primary constructor.

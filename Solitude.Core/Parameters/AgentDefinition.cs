@@ -1,15 +1,12 @@
-public sealed record AgentDefinition
+public sealed record AgentDefinition(
+    string Name,
+    AgentType Type,
+    AgentDrive Drive,
+    AgentStature Stature)
 {
-    public required string Name;
-    public required AgentType Type;
-    public required AgentDrive Drive;
-    public required AgentStature Stature;
+    public static AgentDefinition Colonist => new("Colonist",
+        AgentType.Human,
+        AgentDrive.Acceptable,
+        AgentStature.HugeHugo);
 
-    public static AgentDefinition Colonist { get; } = new()
-    {
-        Name = "Colonist",
-        Type = AgentType.Human,
-        Drive = AgentDrive.Acceptable,
-        Stature = AgentStature.HugeHugo
-    };
 }

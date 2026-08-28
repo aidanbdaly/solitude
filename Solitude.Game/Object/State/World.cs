@@ -9,7 +9,11 @@ public readonly record struct WorldAddress(
 
 public sealed class World(uint width, uint height)
 {
+    public uint Width { get; } = width;
+    public uint Height { get; } = height;
+
     private long _nextAgentId;
+    private long _nextItemId;
 
     private readonly Dictionary<long, Agent> _agent = [];
     private readonly Dictionary<long, WorldAddress> _agentAddress = [];
@@ -18,6 +22,25 @@ public sealed class World(uint width, uint height)
     private readonly Dictionary<long, WorldAddress> _itemAddress = [];
 
     private readonly SparseGrid<Map> _map = new(width, height);
+
+    public long CreateItem(ItemType type, WorldAddress address)
+    {
+        var map = GetMap(address.WorldCoordinate);
+
+        var itemId = _nextItemId;
+        var item = new Item
+        {
+            Id = itemId,
+            Type = type
+        };
+
+        map.SetItem(item, address.MapCoordinate);
+        _item.Add(itemId, item);
+        _itemAddress.Add(itemId, address);
+        _nextItemId++;
+
+        return itemId;
+    }
 
     public long CreateAgent(AgentDefinition definition, WorldAddress address)
     {

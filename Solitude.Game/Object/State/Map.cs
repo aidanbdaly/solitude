@@ -52,6 +52,8 @@ public sealed class Map(uint width, uint height)
         });
     }
 
+    public uint GetTime() => Time.Get();
+
     public void SetTile(Tile tile, Vector2I coordinate)
         => _tile.Set(coordinate, tile);
 
@@ -73,8 +75,15 @@ public sealed class Map(uint width, uint height)
     public void SetItem(Item item, Vector2I coordinate)
         => Occupy(_item, coordinate, item);
 
-    public void RemoveItem(Vector2I coordinate)
-        => Release(_item, coordinate);
+    public void RemoveItem(Item item, Vector2I coordinate)
+    {
+        if (!ReferenceEquals(_item.Get(coordinate), item))
+        {
+            throw new InvalidOperationException($"Item '{item.Id}' is not present at coordinate '{coordinate}'");
+        }
+
+        Release(_item, coordinate);
+    }
 
     public void SetAgent(Agent agent, Vector2I coordinate)
         => Occupy(_agent, coordinate, agent);

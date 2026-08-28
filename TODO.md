@@ -1,4 +1,32 @@
 The remaining blockers, in priority order:
+  What remains to resolve:
+
+  1. Item support in version 1
+
+  World contains item dictionaries but has no item allocator or creation operation. Choose either:
+
+  - Implement world-owned item creation, IDs, placement, and restoration.
+  - Exclude ItemSave and item placements from version 1.
+
+  I recommend excluding items until their lifecycle exists.
+
+ 
+  3. Restoration construction paths
+
+  Normal commands are unsuitable for restoration because they allocate IDs and generate maps. Add controlled internal paths for:
+
+  - Inserting a preconstructed map at a world coordinate.
+  - Inserting agents/items with known IDs.
+  - Restoring _nextAgentId.
+  - Rebuilding address indexes from placements.
+  - Constructing Game with a restored World and active coordinate without emitting events.
+
+  These should be internal/private restoration APIs, not general public mutation.
+
+  4. Movement consistency
+
+  World.MoveAgent() removes the old placement before attempting the destination placement. If the destination is occupied, the agent becomes absent from maps while its address index still points to the old location. This is
+  not specifically a serialization problem, but it can produce an inconsistent snapshot.
 
  
  

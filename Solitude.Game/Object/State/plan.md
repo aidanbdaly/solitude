@@ -39,7 +39,10 @@ public readonly record struct Coordinate(int X, int Y);
 public sealed record GameSnapshot(
     int Version,
     WorldSnapshot World,
-    Coordinate? ActiveWorldCoordinate);
+    Coordinate? ActiveWorldCoordinate)
+{
+    public const int CurrentVersion = 1;
+}
 
 public sealed record WorldSnapshot(
     uint Width,
@@ -114,16 +117,21 @@ of mutable domain objects; structural values and placements use ordinary nouns.
 
 ## Conversion boundary
 
-Add snapshot operations at the aggregate boundaries:
+Keep conversion in static extension factories under `Solitude.Game/Persistence`:
 
 ```csharp
-public GameSnapshot CreateSnapshot();
-internal static Game Restore(GameSnapshot snapshot);
+public static GameSnapshot ToSnapshot(this Game game);
+internal static Game ToGame(this GameSnapshot snapshot);
+internal static WorldSnapshot ToSnapshot(this World world);
+internal static World ToWorld(this WorldSnapshot snapshot);
+internal static MapSnapshot ToSnapshot(this Map map, Coordinate worldCoordinate);
+internal static Map ToMap(this MapSnapshot snapshot);
 ```
 
-`World` and `Map` should have corresponding internal snapshot and restore
-operations. They may access their own private collections but must not expose those
-collections publicly merely for serialization.
+State classes must not reference snapshot types. They expose narrowly scoped,
+internal domain-state queries and construction hooks so the factories can enumerate
+state and rebuild complete aggregates without making those operations part of the
+public gameplay API.
 
 Restoration should:
 
@@ -136,10 +144,10 @@ Restoration should:
 6. Validate and restore the active world coordinate without emitting runtime
    change events.
 
-`Save.Write` serializes `game.CreateSnapshot()`. `Save.Read` deserializes
-`GameSnapshot`, validates version `1`, and calls `Game.Restore(snapshot)`. Opening
-either read or write files must be checked before dereferencing the Godot
-`FileAccess` result.
+`Save.Write` serializes `game.ToSnapshot()`. `Save.Read` deserializes
+`GameSnapshot`, validates `GameSnapshot.CurrentVersion`, and calls
+`snapshot.ToGame()`. Opening either read or write files must be checked before
+dereferencing the Godot `FileAccess` result.
 
 ## Validation and tests
 
@@ -158,16 +166,8 @@ either read or write files must be checked before dereferencing the Godot
 ## Implementation order
 
 1. Add the schema records and coordinate conversions.
-2. Implement map snapshots and restoration.
-3. Implement world entity snapshots, placement resolution, and index rebuilding.
-4. Implement `Game.CreateSnapshot` and `Game.Restore`.
+2. Implement the map snapshot extension factory.
+3. Implement the world snapshot extension factory, placement resolution, and index rebuilding.
+4. Implement the game snapshot extension factory.
 5. Switch `Save.Read` and `Save.Write` to the versioned schema.
 6. Add round-trip and malformed-save tests.
-
-## Remaining implementation work
-
-- Add controlled restoration paths that can insert known agent/item IDs and set
-  `_nextAgentId` and `_nextItemId` without using normal creation commands.
-- Add a private restoration constructor or factory path that lets `Game` receive a
-  restored `World` and active coordinate instead of always constructing a new,
-  empty world through its primary constructor.

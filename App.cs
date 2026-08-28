@@ -1,5 +1,5 @@
-using System;
-using Godot;
+ using Godot;
+using Solitude.Persistence;
 
 public partial class App : Node
 {
@@ -8,23 +8,16 @@ public partial class App : Node
 
     public void NewGame(NewGameRequest request)
     {
-        if (Save.Exists(request.Name))
-        {
-            throw new InvalidOperationException($"Save '{request.Name}' already exists");
-        }
-
         var game = new Game(request.WorldWidth, request.WorldHeight);
-
         game.CreatePopulatedMap(request.CreatePopulatedMapRequest);
-        
         game.SetActiveMap(request.CreatePopulatedMapRequest.Coordinate);
 
-        Save.Write(request.Name, game);
+        UserData.SaveGame(request.Name, game);
 
         EnterGame(game);
     }
 
-    public void LoadGame(string saveName) => EnterGame(Save.Read(saveName));
+    public void LoadGame(string slot) => EnterGame(UserData.LoadGame(slot));
 
     public void QuitGame()
     {

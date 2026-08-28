@@ -6,13 +6,31 @@ public sealed class MapChangedEvent : EventArgs
     public required Map NewMap { get; init; }
 }
 
-public sealed partial class Game(uint worldWidth, uint worldHeight)
+public sealed partial class Game
 {
     public event EventHandler<MapChangedEvent>? MapChanged;
 
-    private readonly Player _player = new();
-    private readonly World _world = new(worldWidth, worldHeight);
-    private Vector2I? _worldCoordinate = null;
+    private readonly Player _player;
+    private readonly World _world;
+    private Vector2I? _worldCoordinate;
+
+    public Game(uint worldWidth, uint worldHeight)
+        : this(new(), new(worldWidth, worldHeight), null)
+    {
+    }
+
+    internal Game(Player player, World world, Vector2I? worldCoordinate)
+    {
+        _player = player;
+        _world = world;
+        _worldCoordinate = worldCoordinate;
+    }
+
+    internal Player Player => _player;
+
+    internal World World => _world;
+
+    internal Vector2I? ActiveWorldCoordinate => _worldCoordinate;
 
     public Map GetActiveMap()
     {
@@ -45,4 +63,5 @@ public sealed partial class Game(uint worldWidth, uint worldHeight)
             _world.CreateAgent(agent, new(request.Coordinate, Vector2I.One));
         }
     }
+
 }

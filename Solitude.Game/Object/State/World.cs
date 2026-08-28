@@ -95,4 +95,44 @@ public sealed class World(uint width, uint height)
         return _map.Get(worldCoordinate)
             ?? throw new InvalidOperationException("Call to GetMap() failed: Map does not exist for coordinate");
     }
+
+    internal long NextAgentId => _nextAgentId;
+
+    internal long NextItemId => _nextItemId;
+
+    internal IReadOnlyDictionary<long, Agent> Agents => _agent;
+
+    internal IReadOnlyDictionary<long, Item> Items => _item;
+
+    internal IEnumerable<(Vector2I Coordinate, Map Map)> GetMaps()
+    {
+        foreach (var (coordinate, map) in _map)
+        {
+            yield return (coordinate, map);
+        }
+    }
+
+    internal void AddMap(Vector2I coordinate, Map map) => _map.Set(coordinate, map);
+
+    internal void AddAgent(Agent agent) => _agent.Add(agent.Id, agent);
+
+    internal void AddItem(Item item) => _item.Add(item.Id, item);
+
+    internal void PlaceAgent(long agentId, WorldAddress address)
+    {
+        GetMap(address.WorldCoordinate).SetAgent(_agent[agentId], address.MapCoordinate);
+        _agentAddress.Add(agentId, address);
+    }
+
+    internal void PlaceItem(long itemId, WorldAddress address)
+    {
+        GetMap(address.WorldCoordinate).SetItem(_item[itemId], address.MapCoordinate);
+        _itemAddress.Add(itemId, address);
+    }
+
+    internal void SetNextIds(long nextAgentId, long nextItemId)
+    {
+        _nextAgentId = nextAgentId;
+        _nextItemId = nextItemId;
+    }
 }

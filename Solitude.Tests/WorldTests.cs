@@ -20,7 +20,7 @@ public sealed class WorldTests
     }
 
     [Fact]
-    public void SetAgentAddress_MovesAgentWithinMap()
+    public void MoveAgent_MovesAgentWithinMap()
     {
         var world = CreateWorld(new(2, 1));
         var id = world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Zero));
@@ -33,7 +33,7 @@ public sealed class WorldTests
     }
 
     [Fact]
-    public void SetAgentAddress_MovesAgentBetweenMaps()
+    public void MoveAgent_MovesAgentBetweenMaps()
     {
         var world = CreateWorld(new(1, 1), new Vector2I(1, 0));
         var id = world.CreateAgent(AgentDefinition, new(Vector2I.Zero, Vector2I.Zero));
@@ -81,7 +81,7 @@ public sealed class WorldTests
     }
 
     [Fact]
-    public void SetAgentAddress_CurrentAddressIsNoOpAndUnknownIdIsRejected()
+    public void MoveAgent_CurrentAddressIsNoOpAndUnknownIdIsRejected()
     {
         var world = CreateWorld(new(1, 1));
         var address = new WorldAddress(Vector2I.Zero, Vector2I.Zero);

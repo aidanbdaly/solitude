@@ -6,6 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Solitude.Tests/**/*.cs" />
+    <Compile Remove="Solitude.Test/**/*.cs" />
   </ItemGroup>
 </Project>

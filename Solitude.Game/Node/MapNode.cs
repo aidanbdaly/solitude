@@ -52,7 +52,7 @@ public partial class MapNode : Node2D
         _map.TimeChanged += OnTimeChanged;
 
         _cacheStale = true;
-        GetNode<Camera>("Camera").SetSurface(map.GetSize() * SourceTileSize);
+        GetNode<Camera>("Camera").SetSurface(ToVector2(map.GetSize()) * SourceTileSize);
         QueueRedraw();
     }
 
@@ -114,14 +114,14 @@ public partial class MapNode : Node2D
                     srcY,
                     SourceTileSize,
                     SourceTileSize),
-                coordinate * SourceTileSize);
+                ToVector2I(coordinate) * SourceTileSize);
         }
 
         return ImageTexture.CreateFromImage(cache);
     }
 
     private void DrawCache(Map map)
-        => DrawTextureRect(_cache, new Rect2(Vector2.Zero, map.GetSize() * SourceTileSize), false);
+        => DrawTextureRect(_cache, new Rect2(Vector2.Zero, ToVector2(map.GetSize()) * SourceTileSize), false);
 
     private void DrawItemAggregate(Map map)
     {
@@ -189,6 +189,12 @@ public partial class MapNode : Node2D
                     size));
         }
     }
+
+    private static Vector2 ToVector2(Coordinate coordinate) =>
+        new(coordinate.X, coordinate.Y);
+
+    private static Vector2I ToVector2I(Coordinate coordinate) =>
+        new(coordinate.X, coordinate.Y);
 
     public override void _Draw()
     {

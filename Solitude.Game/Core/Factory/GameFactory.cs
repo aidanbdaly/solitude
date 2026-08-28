@@ -9,7 +9,7 @@ public static class GameFactory
         => new(
             GameSnapshot.CurrentVersion,
             game.World.ToSnapshot(),
-            game.ActiveWorldCoordinate?.ToSnapshot());
+            game.ActiveWorldCoordinate);
 
     internal static Game ToGame(this GameSnapshot snapshot)
     {
@@ -20,7 +20,7 @@ public static class GameFactory
         SnapshotValidation.Require(snapshot.World is not null, "World snapshot is missing");
 
         var world = snapshot.World.ToWorld();
-        var activeWorldCoordinate = snapshot.ActiveWorldCoordinate?.ToVector2I();
+        var activeWorldCoordinate = snapshot.ActiveWorldCoordinate;
 
         if (activeWorldCoordinate is not null)
         {

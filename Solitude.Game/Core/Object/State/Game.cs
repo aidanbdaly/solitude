@@ -1,5 +1,4 @@
 using System;
-using Godot;
 
 public sealed class MapChangedEvent : EventArgs
 {
@@ -12,14 +11,14 @@ public sealed partial class Game
 
     private readonly Player _player;
     private readonly World _world;
-    private Vector2I? _worldCoordinate;
+    private Coordinate? _worldCoordinate;
 
     public Game(uint worldWidth, uint worldHeight)
         : this(new(), new(worldWidth, worldHeight), null)
     {
     }
 
-    internal Game(Player player, World world, Vector2I? worldCoordinate)
+    internal Game(Player player, World world, Coordinate? worldCoordinate)
     {
         _player = player;
         _world = world;
@@ -30,11 +29,11 @@ public sealed partial class Game
 
     internal World World => _world;
 
-    internal Vector2I? ActiveWorldCoordinate => _worldCoordinate;
+    internal Coordinate? ActiveWorldCoordinate => _worldCoordinate;
 
     public Map GetActiveMap()
     {
-        if (_worldCoordinate is Vector2I worldCoordinate)
+        if (_worldCoordinate is Coordinate worldCoordinate)
         {
             return _world.GetMap(worldCoordinate);
         }
@@ -44,7 +43,7 @@ public sealed partial class Game
         }
     }
 
-    public void SetActiveMap(Vector2I worldCoordinate)
+    public void SetActiveMap(Coordinate worldCoordinate)
     {
         _worldCoordinate = worldCoordinate;
 
@@ -60,7 +59,7 @@ public sealed partial class Game
 
         foreach (var agent in request.Agents)
         {
-            _world.CreateAgent(agent, new(request.Coordinate, Vector2I.One));
+            _world.CreateAgent(agent, new(request.Coordinate, Coordinate.One));
         }
     }
 

@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using Godot;
 
 namespace Solitude.Persistence;
 
@@ -20,8 +17,4 @@ internal static class SnapshotValidation
 
     internal static bool Contains(Coordinate coordinate, int width, int height)
         => (uint)coordinate.X < (uint)width && (uint)coordinate.Y < (uint)height;
-
-    internal static Coordinate ToSnapshot(this Vector2I coordinate) => new(coordinate.X, coordinate.Y);
-
-    internal static Vector2I ToVector2I(this Coordinate coordinate) => new(coordinate.X, coordinate.Y);
 }

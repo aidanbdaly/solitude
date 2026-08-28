@@ -26,7 +26,7 @@ internal static class WorldSnapshotFactory
             .ToArray();
 
         var maps = world.GetMaps()
-            .Select(entry => entry.Map.ToSnapshot(entry.Coordinate.ToSnapshot()))
+            .Select(entry => entry.Map.ToSnapshot(entry.Coordinate))
             .ToArray();
 
         return new(
@@ -57,7 +57,7 @@ internal static class WorldSnapshotFactory
             SnapshotValidation.Require(mapSnapshot is not null, "Map snapshot is missing");
             ValidateWorldCoordinate(mapSnapshot.WorldCoordinate, snapshot.Width, snapshot.Height);
             SnapshotValidation.Require(mapCoordinates.Add(mapSnapshot.WorldCoordinate), "Map coordinates must be unique");
-            world.AddMap(mapSnapshot.WorldCoordinate.ToVector2I(), mapSnapshot.ToMap());
+            world.AddMap(mapSnapshot.WorldCoordinate, mapSnapshot.ToMap());
         }
 
         long maximumAgentId = -1;
@@ -139,7 +139,7 @@ internal static class WorldSnapshotFactory
 
         foreach (var mapSnapshot in mapSnapshots)
         {
-            var worldCoordinate = mapSnapshot.WorldCoordinate.ToVector2I();
+            var worldCoordinate = mapSnapshot.WorldCoordinate;
 
             foreach (var placement in SnapshotValidation.RequireList(mapSnapshot.Agents, nameof(mapSnapshot.Agents)))
             {
@@ -154,7 +154,7 @@ internal static class WorldSnapshotFactory
 
                 world.PlaceAgent(
                     placement.AgentId,
-                    new(worldCoordinate, placement.Coordinate.ToVector2I()));
+                    new(worldCoordinate, placement.Coordinate));
             }
 
             foreach (var placement in SnapshotValidation.RequireList(mapSnapshot.Items, nameof(mapSnapshot.Items)))
@@ -170,7 +170,7 @@ internal static class WorldSnapshotFactory
 
                 world.PlaceItem(
                     placement.ItemId,
-                    new(worldCoordinate, placement.Coordinate.ToVector2I()));
+                    new(worldCoordinate, placement.Coordinate));
             }
         }
 

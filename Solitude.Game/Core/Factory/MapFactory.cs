@@ -17,26 +17,26 @@ internal static class MapSnapshotFactory
         var features = new List<FeaturePlacement>();
         foreach (var (coordinate, feature) in map.Feature)
         {
-            features.Add(new(coordinate.ToSnapshot(), feature.Type));
+            features.Add(new(coordinate, feature.Type));
         }
 
         var work = new List<WorkPlacement>();
         foreach (var (coordinate, value) in map.Work)
         {
-            work.Add(new(coordinate.ToSnapshot(), value.GetRequired(), value.Get()));
+            work.Add(new(coordinate, value.GetRequired(), value.Get()));
         }
 
         var items = new List<ItemPlacement>();
         foreach (var (coordinate, item) in map.Item)
         {
-            items.Add(new(coordinate.ToSnapshot(), item.Id));
+            items.Add(new(coordinate, item.Id));
         }
 
         var aggregates = new List<ItemAggregatePlacement>();
         foreach (var (coordinate, aggregate) in map.Aggregate)
         {
             aggregates.Add(new(
-                coordinate.ToSnapshot(),
+                coordinate,
                 aggregate.Required.ToArray(),
                 aggregate
                     .OrderBy(entry => entry.Key)
@@ -47,7 +47,7 @@ internal static class MapSnapshotFactory
         var agents = new List<AgentPlacement>();
         foreach (var (coordinate, agent) in map.Agent)
         {
-            agents.Add(new(coordinate.ToSnapshot(), agent.Id));
+            agents.Add(new(coordinate, agent.Id));
         }
 
         return new(
@@ -94,7 +94,7 @@ internal static class MapSnapshotFactory
             SnapshotValidation.Require(placement is not null, "Feature placement is missing");
             ValidateCoordinate(placement.Coordinate, snapshot.Width, snapshot.Height);
             SnapshotValidation.Require(Enum.IsDefined(placement.Type), $"Invalid feature type '{placement.Type}'");
-            map.SetFeature(new(placement.Type), placement.Coordinate.ToVector2I());
+            map.SetFeature(new(placement.Type), placement.Coordinate);
         }
 
         foreach (var placement in SnapshotValidation.RequireList(snapshot.Work, nameof(snapshot.Work)))
@@ -108,7 +108,7 @@ internal static class MapSnapshotFactory
 
             var value = new Work(placement.Required);
             value.Set(placement.Current);
-            map.SetWork(value, placement.Coordinate.ToVector2I());
+            map.SetWork(value, placement.Coordinate);
         }
 
         foreach (var placement in SnapshotValidation.RequireList(snapshot.ItemAggregates, nameof(snapshot.ItemAggregates)))
@@ -137,7 +137,7 @@ internal static class MapSnapshotFactory
                 aggregate.Add(content.Type, content.Count);
             }
 
-            map.SetItemAggregate(aggregate, placement.Coordinate.ToVector2I());
+            map.SetItemAggregate(aggregate, placement.Coordinate);
         }
 
         map.SetTime(snapshot.Time);

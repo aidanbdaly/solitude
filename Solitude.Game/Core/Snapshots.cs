@@ -1,8 +1,3 @@
-using System.Collections.Generic;
- 
-
-public readonly record struct Coordinate(int X, int Y);
-
 public sealed record ItemCount(ItemType Type, int Count);
 
 public sealed record AgentPlacement(Coordinate Coordinate, long AgentId);

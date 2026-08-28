@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Godot;
 
 public sealed class GridChangedEvent : EventArgs
 {
-    public required Vector2I Coordinate { get; init; }
+    public required Coordinate Coordinate { get; init; }
 };
 
 public sealed class Grid<T>(uint width, uint height) : IReadOnlyGrid<T> where T : struct
@@ -14,7 +13,7 @@ public sealed class Grid<T>(uint width, uint height) : IReadOnlyGrid<T> where T 
     private readonly T[] _cells =
         new T[checked((int)((ulong)width * height))];
 
-    public void Set(Vector2I coordinate, T value)
+    public void Set(Coordinate coordinate, T value)
     {
         _cells[GetIndex(coordinate)] = value;
         
@@ -24,12 +23,12 @@ public sealed class Grid<T>(uint width, uint height) : IReadOnlyGrid<T> where T 
         });
     }
 
-    public T Get(Vector2I coordinate)
+    public T Get(Coordinate coordinate)
     {
         return _cells[GetIndex(coordinate)];
     }
 
-    public IEnumerator<(Vector2I coordinate, T value)> GetEnumerator()
+    public IEnumerator<(Coordinate coordinate, T value)> GetEnumerator()
     {
         var i = 0;
 
@@ -37,12 +36,12 @@ public sealed class Grid<T>(uint width, uint height) : IReadOnlyGrid<T> where T 
         {
             for (var x = 0; x < width; x++)
             {
-                yield return (new Vector2I(x, y), _cells[i++]);
+                yield return (new Coordinate(x, y), _cells[i++]);
             }
         }
     }
 
-    private int GetIndex(Vector2I coordinate)
+    private int GetIndex(Coordinate coordinate)
     {
         if ((uint)coordinate.X >= width ||
             (uint)coordinate.Y >= height)

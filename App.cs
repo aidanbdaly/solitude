@@ -1,4 +1,4 @@
- using Godot;
+using Godot;
 using Solitude.Persistence;
 
 public partial class App : Node

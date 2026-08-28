@@ -1,5 +1,4 @@
 using System;
-using Godot;
 
 public sealed class TimeChangedEvent : EventArgs
 {
@@ -54,28 +53,28 @@ public sealed class Map(uint width, uint height)
 
     public uint GetTime() => Time.Get();
 
-    public void SetTile(Tile tile, Vector2I coordinate)
+    public void SetTile(Tile tile, Coordinate coordinate)
         => _tile.Set(coordinate, tile);
 
-    public Tile GetTile(Vector2I coordinate)
+    public Tile GetTile(Coordinate coordinate)
         => _tile.Get(coordinate);
 
-    public void SetFeature(Feature feature, Vector2I coordinate)
+    public void SetFeature(Feature feature, Coordinate coordinate)
         => Occupy(_feature, coordinate, feature);
 
-    public void RemoveFeature(Vector2I coordinate)
+    public void RemoveFeature(Coordinate coordinate)
         => Release(_feature, coordinate);
 
-    public void SetWork(Work work, Vector2I coordinate)
+    public void SetWork(Work work, Coordinate coordinate)
         => Occupy(_work, coordinate, work);
 
-    public void RemoveWork(Vector2I coordinate)
+    public void RemoveWork(Coordinate coordinate)
         => Release(_work, coordinate);
 
-    public void SetItem(Item item, Vector2I coordinate)
+    public void SetItem(Item item, Coordinate coordinate)
         => Occupy(_item, coordinate, item);
 
-    public void RemoveItem(Item item, Vector2I coordinate)
+    public void RemoveItem(Item item, Coordinate coordinate)
     {
         if (!ReferenceEquals(_item.Get(coordinate), item))
         {
@@ -85,10 +84,10 @@ public sealed class Map(uint width, uint height)
         Release(_item, coordinate);
     }
 
-    public void SetAgent(Agent agent, Vector2I coordinate)
+    public void SetAgent(Agent agent, Coordinate coordinate)
         => Occupy(_agent, coordinate, agent);
 
-    public void RemoveAgent(Agent agent, Vector2I coordinate)
+    public void RemoveAgent(Agent agent, Coordinate coordinate)
     {
         if (!ReferenceEquals(_agent.Get(coordinate), agent))
         {
@@ -98,13 +97,13 @@ public sealed class Map(uint width, uint height)
         Release(_agent, coordinate);
     }
 
-    public void SetItemAggregate(ItemAggregate aggregate, Vector2I coordinate)
+    public void SetItemAggregate(ItemAggregate aggregate, Coordinate coordinate)
         => Occupy(_aggregate, coordinate, aggregate);
 
-    public void RemoveItemAggregate(Vector2I coordinate)
+    public void RemoveItemAggregate(Coordinate coordinate)
         => Release(_aggregate, coordinate);
 
-    private void Occupy<T>(SparseGrid<T> entity, Vector2I coordinate, T value) where T : class
+    private void Occupy<T>(SparseGrid<T> entity, Coordinate coordinate, T value) where T : class
     {
         if (_occupation.Get(coordinate))
         {
@@ -115,7 +114,7 @@ public sealed class Map(uint width, uint height)
         entity.Set(coordinate, value);
     }
 
-    private void Release<T>(SparseGrid<T> entity, Vector2I coordinate) where T : class
+    private void Release<T>(SparseGrid<T> entity, Coordinate coordinate) where T : class
     {
         if (entity.Remove(coordinate))
         {
@@ -123,13 +122,7 @@ public sealed class Map(uint width, uint height)
         }
     }
 
-    public Vector2 GetSize()
-    {
-        return new Vector2(
-            Width,
-            Height
-        );
-    }
+    public Coordinate GetSize() => new(Width, Height);
 
     public static Map Generate(MapStyle style)
     {

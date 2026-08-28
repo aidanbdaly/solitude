@@ -1,9 +1,8 @@
 
 using System.Collections.Generic;
-using Godot;
 
 public record CreatePopulatedMapRequest(
-    Vector2I Coordinate,
+    Coordinate Coordinate,
     MapStyle MapStyle,
     List<AgentDefinition> Agents
 )

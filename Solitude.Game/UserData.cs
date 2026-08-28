@@ -2,12 +2,14 @@ using System;
 using System.Text.Json;
 using Godot;
 
+using FileAccess = Godot.FileAccess;
+
 namespace Solitude.Persistence;
 
 public static class UserData
 {
     public const string DefaultSlot = "default";
-    
+
     private const string SaveDirectory = "user://saves";
 
     private static readonly JsonSerializerOptions JsonOptions = new()

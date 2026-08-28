@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Godot;
 
 public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid<T> where T : class
 {
     private readonly T?[] _cells =
         new T?[checked((int)((ulong)width * height))];
 
-    public void Set(Vector2I coordinate, T value)
+    public void Set(Coordinate coordinate, T value)
     {
         var cellId = GetIndex(coordinate);
 
@@ -19,7 +18,7 @@ public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid
         _cells[cellId] = value;
     }
 
-    public IEnumerator<(Vector2I coordinate, T value)> GetEnumerator()
+    public IEnumerator<(Coordinate coordinate, T value)> GetEnumerator()
     {
         var i = 0;
 
@@ -31,18 +30,18 @@ public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid
 
                 if (value is not null)
                 {
-                    yield return (new Vector2I(x, y), value);
+                    yield return (new Coordinate(x, y), value);
                 }
             }
         }
     }
 
-    public T? Get(Vector2I coordinate)
+    public T? Get(Coordinate coordinate)
     {
         return _cells[GetIndex(coordinate)];
     }
 
-    public bool Remove(Vector2I coordinate)
+    public bool Remove(Coordinate coordinate)
     {
         var cellId = GetIndex(coordinate);
 
@@ -58,7 +57,7 @@ public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid
         return true;
     }
 
-    private int GetIndex(Vector2I coordinate)
+    private int GetIndex(Coordinate coordinate)
     {
         if ((uint)coordinate.X >= width ||
             (uint)coordinate.Y >= height)

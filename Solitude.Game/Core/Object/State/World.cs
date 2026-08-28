@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Godot;
 
 public readonly record struct WorldAddress(
-    Vector2I WorldCoordinate,
-    Vector2I MapCoordinate
+    Coordinate WorldCoordinate,
+    Coordinate MapCoordinate
 );
 
 public sealed class World(uint width, uint height)
@@ -85,12 +84,12 @@ public sealed class World(uint width, uint height)
         _agentAddress[agentId] = address;
     }
 
-    public void CreateMap(MapStyle style, Vector2I worldCoordinate)
+    public void CreateMap(MapStyle style, Coordinate worldCoordinate)
     {
         _map.Set(worldCoordinate, Map.Generate(style));
     }
 
-    public Map GetMap(Vector2I worldCoordinate)
+    public Map GetMap(Coordinate worldCoordinate)
     {
         return _map.Get(worldCoordinate)
             ?? throw new InvalidOperationException("Call to GetMap() failed: Map does not exist for coordinate");
@@ -104,7 +103,7 @@ public sealed class World(uint width, uint height)
 
     internal IReadOnlyDictionary<long, Item> Items => _item;
 
-    internal IEnumerable<(Vector2I Coordinate, Map Map)> GetMaps()
+    internal IEnumerable<(Coordinate Coordinate, Map Map)> GetMaps()
     {
         foreach (var (coordinate, map) in _map)
         {
@@ -112,7 +111,7 @@ public sealed class World(uint width, uint height)
         }
     }
 
-    internal void AddMap(Vector2I coordinate, Map map) => _map.Set(coordinate, map);
+    internal void AddMap(Coordinate coordinate, Map map) => _map.Set(coordinate, map);
 
     internal void AddAgent(Agent agent) => _agent.Add(agent.Id, agent);
 

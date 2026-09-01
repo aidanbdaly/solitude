@@ -1,0 +1,31 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://Game/Node/GameScene.cs" id="1_game"]
+[ext_resource type="Script" path="res://Game/Node/MapNode.cs" id="2_map"]
+[ext_resource type="Script" path="res://Game/Node/Camera.cs" id="3_camera"]
+[ext_resource type="PackedScene" path="res://Game/UI/Card.tscn" id="4_card"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/tile_atlas_padded.png" id="5_tiles"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/vegetation_atlas.png" id="6_features"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/item_atlas.png" id="7_items"]
+[ext_resource type="Texture2D" path="res://Assets/Game/Textures/agent_atlas.png" id="8_agents"]
+[ext_resource type="PackedScene" path="res://Game/UI/Toolbar.tscn" id="9_toolbar"]
+
+[node name="Game" type="Node"]
+script = ExtResource("1_game")
+
+[node name="Map" type="Node2D" parent="."]
+script = ExtResource("2_map")
+TileAtlas = ExtResource("5_tiles")
+FeatureAtlas = ExtResource("6_features")
+ItemAtlas = ExtResource("7_items")
+AgentAtlas = ExtResource("8_agents")
+
+[node name="Camera" type="Camera2D" parent="Map"]
+script = ExtResource("3_camera")
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Card" parent="UI" instance=ExtResource("4_card")]
+
+[node name="Toolbar" parent="UI" instance=ExtResource("9_toolbar")]

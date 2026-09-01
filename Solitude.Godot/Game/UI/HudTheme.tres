@@ -1,0 +1,127 @@
+[gd_resource type="Theme" format=3 uid="uid://bnj0yb68fhq76"]
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.1255, 0.1529, 0.1882, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="ButtonPressed"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1608, 0.1922, 0.2314, 1)
+border_width_bottom = 2
+border_color = Color(0.8314, 0.651, 0.2588, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="NeedBackground"]
+bg_color = Color(0.1098, 0.1294, 0.1569, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="SatiationFill"]
+bg_color = Color(0.3137, 0.5216, 0.4667, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="SelectionPanelStyle"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.0706, 0.0902, 0.1137, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2039, 0.2353, 0.2745, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="TirednessFill"]
+bg_color = Color(0.5216, 0.451, 0.3686, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="ToolbarStyle"]
+bg_color = Color(0.0706, 0.0902, 0.1137, 0.97)
+border_width_top = 1
+border_color = Color(0.2039, 0.2353, 0.2745, 1)
+
+[resource]
+HudButton/base_type = &"Button"
+HudButton/colors/font_color = Color(0.851, 0.8706, 0.898, 1)
+HudButton/colors/font_hover_color = Color(0.949, 0.9608, 0.9725, 1)
+HudButton/colors/font_pressed_color = Color(0.949, 0.9608, 0.9725, 1)
+HudButton/font_sizes/font_size = 14
+HudButton/styles/focus = SubResource("ButtonHover")
+HudButton/styles/hover = SubResource("ButtonHover")
+HudButton/styles/hover_pressed = SubResource("ButtonPressed")
+HudButton/styles/normal = SubResource("ButtonNormal")
+HudButton/styles/pressed = SubResource("ButtonPressed")
+HudButtonRow/base_type = &"HBoxContainer"
+HudButtonRow/constants/separation = 2
+HudContent/base_type = &"VBoxContainer"
+HudContent/constants/separation = 3
+HudMutedText/base_type = &"Label"
+HudMutedText/colors/font_color = Color(0.6392, 0.6706, 0.7098, 1)
+HudMutedText/font_sizes/font_size = 13
+HudNeedLabel/base_type = &"Label"
+HudNeedLabel/colors/font_color = Color(0.6392, 0.6706, 0.7098, 1)
+HudNeedLabel/font_sizes/font_size = 12
+HudNeeds/base_type = &"GridContainer"
+HudNeeds/constants/h_separation = 8
+HudNeeds/constants/v_separation = 3
+HudSatiationBar/base_type = &"ProgressBar"
+HudSatiationBar/colors/font_color = Color(0.949, 0.9608, 0.9725, 1)
+HudSatiationBar/font_sizes/font_size = 11
+HudSatiationBar/styles/background = SubResource("NeedBackground")
+HudSatiationBar/styles/fill = SubResource("SatiationFill")
+HudSelectionPanel/base_type = &"PanelContainer"
+HudSelectionPanel/styles/panel = SubResource("SelectionPanelStyle")
+HudTirednessBar/base_type = &"ProgressBar"
+HudTirednessBar/colors/font_color = Color(0.949, 0.9608, 0.9725, 1)
+HudTirednessBar/font_sizes/font_size = 11
+HudTirednessBar/styles/background = SubResource("NeedBackground")
+HudTirednessBar/styles/fill = SubResource("TirednessFill")
+HudTitle/base_type = &"Label"
+HudTitle/colors/font_color = Color(0.851, 0.8706, 0.898, 1)
+HudTitle/font_sizes/font_size = 16
+HudToolbar/base_type = &"PanelContainer"
+HudToolbar/styles/panel = SubResource("ToolbarStyle")
+HudToolbarMargin/base_type = &"MarginContainer"
+HudToolbarMargin/constants/margin_bottom = 5
+HudToolbarMargin/constants/margin_left = 12
+HudToolbarMargin/constants/margin_right = 12
+HudToolbarMargin/constants/margin_top = 5
+HudToolbarRow/base_type = &"HBoxContainer"
+HudToolbarRow/constants/separation = 8

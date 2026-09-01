@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public sealed class GridChangedEvent : EventArgs
@@ -40,6 +41,8 @@ public sealed class Grid<T>(uint width, uint height) : IReadOnlyGrid<T> where T 
             }
         }
     }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private int GetIndex(Coordinate coordinate)
     {

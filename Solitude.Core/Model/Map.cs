@@ -13,7 +13,7 @@ public sealed class Map(uint width, uint height)
 
     private readonly Grid<bool> _occupation = new(width, height);
 
-    private readonly Grid<Tile> _tile = new(width, height);
+    private readonly Grid<TileType> _tile = new(width, height);
 
     private readonly SparseGrid<Feature> _feature = new(width, height);
 
@@ -27,7 +27,7 @@ public sealed class Map(uint width, uint height)
 
     public IReadOnlyGrid<bool> Occupation => _occupation;
 
-    public IReadOnlyGrid<Tile> Tile => _tile;
+    public IReadOnlyGrid<TileType> Tile => _tile;
 
     public IReadOnlySparseGrid<Feature> Feature => _feature;
 
@@ -51,10 +51,10 @@ public sealed class Map(uint width, uint height)
 
     public uint GetTime() => Time.Get();
 
-    public void SetTile(Tile tile, Coordinate coordinate)
-        => _tile.Set(coordinate, tile);
+    public void SetTile(TileType type, Coordinate coordinate)
+        => _tile.Set(coordinate, type);
 
-    public Tile GetTile(Coordinate coordinate)
+    public TileType GetTile(Coordinate coordinate)
         => _tile.Get(coordinate);
 
     public void SetFeature(Feature feature, Coordinate coordinate)
@@ -122,34 +122,32 @@ public sealed class Map(uint width, uint height)
 
     public Coordinate GetSize() => new(Width, Height);
 
-    public static Map Generate(MapStyle style)
+    public static Map FromDefinition(MapDefinition definition)
     {
-        var map = new Map(style.Width, style.Height);
+        var map = new Map(definition.Width, definition.Height);
 
-        var generation = style.Generation;
+        var random = new Random(definition.Seed);
 
         for (var y = 0; y < map.Height; y++)
         {
             for (var x = 0; x < map.Width; x++)
             {
-                var noise = PerlinNoise.Noise2D(
-                    x * generation.NoiseScale,
-                    y * generation.NoiseScale);
+                var noise = PerlinNoise.Noise2DByte(
+                    x * definition.NoiseScale,
+                    y * definition.NoiseScale);
 
-                var type = noise < generation.WaterThreshold
-                    ? TileType.Water
-                    : noise < generation.GrassThreshold ? TileType.Grass : TileType.Stone;
+                var type = definition.Pallete[noise];
 
-                map.SetTile(new(type), new(x, y));
+                map.SetTile(type, new(x, y));
 
                 if (type == TileType.Stone)
                 {
                     map.SetFeature(new(FeatureType.Rock), new(x, y));
                 }
 
-                if (type == TileType.Grass)
+                if (type == TileType.Grass && random.NextSingle() < definition.FloraDensity)
                 {
-                    map.SetFeature(new(FeatureType.Flora), new(x, y)); // Spread out
+                    map.SetFeature(new(FeatureType.Flora), new(x, y));
                 }
             }
         }

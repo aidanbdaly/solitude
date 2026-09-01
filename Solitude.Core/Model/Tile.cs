@@ -1,1 +1,0 @@
-public readonly record struct Tile(TileType Type);

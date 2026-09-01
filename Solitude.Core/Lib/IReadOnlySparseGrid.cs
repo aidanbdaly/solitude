@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 
-public interface IReadOnlySparseGrid<T>
+public interface IReadOnlySparseGrid<T> : IEnumerable<(Coordinate coordinate, T value)>
 {
     T? Get(Coordinate coordinate);
-    IEnumerator<(Coordinate coordinate, T value)> GetEnumerator();
 }

@@ -68,8 +68,8 @@ public sealed class SnapshotTests
             2,
             321,
             [
-                new(TileType.Grass), new(TileType.Water), new(TileType.Stone), new(TileType.Grass),
-                new(TileType.Water), new(TileType.Grass), new(TileType.Stone), new(TileType.Water)
+                TileType.Grass, TileType.Water, TileType.Stone, TileType.Grass,
+                TileType.Water, TileType.Grass, TileType.Stone, TileType.Water
             ],
             [new(new(0, 0), FeatureType.Flora)],
             [new(new(1, 0), 12, 5)],
@@ -85,7 +85,7 @@ public sealed class SnapshotTests
             2,
             2,
             654,
-            [new(TileType.Stone), new(TileType.Grass), new(TileType.Water), new(TileType.Grass)],
+            [TileType.Stone, TileType.Grass, TileType.Water, TileType.Grass],
             [],
             [],
             [new(new(1, 0), 9)],
@@ -130,7 +130,7 @@ public sealed class SnapshotTests
             1,
             1,
             0,
-            [new(TileType.Grass)],
+            [TileType.Grass],
             [],
             [],
             [],

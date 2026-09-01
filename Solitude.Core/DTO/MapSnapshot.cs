@@ -5,7 +5,7 @@ public sealed record MapSnapshot(
     int Width,
     int Height,
     uint Time,
-    IReadOnlyList<Tile> Tiles,
+    IReadOnlyList<TileType> Tiles,
     IReadOnlyList<FeaturePlacement> Features,
     IReadOnlyList<WorkPlacement> Work,
     IReadOnlyList<ItemPlacement> Items,

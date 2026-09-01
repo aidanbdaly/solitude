@@ -8,7 +8,7 @@ internal static class MapSnapshotFactory
 {
     internal static MapSnapshot ToSnapshot(this Map map, Coordinate worldCoordinate)
     {
-        var tiles = new List<Tile>(checked(map.Width * map.Height));
+        var tiles = new List<TileType>(checked(map.Width * map.Height));
         foreach (var (_, tile) in map.Tile)
         {
             tiles.Add(tile);
@@ -84,7 +84,7 @@ internal static class MapSnapshotFactory
             for (var x = 0; x < snapshot.Width; x++)
             {
                 var tile = tiles[tileIndex++];
-                SnapshotValidation.Require(Enum.IsDefined(tile.Type), $"Invalid tile type '{tile.Type}'");
+                SnapshotValidation.Require(Enum.IsDefined(tile), $"Invalid tile type '{tile}'");
                 map.SetTile(tile, new(x, y));
             }
         }

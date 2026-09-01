@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public record CreatePopulatedMapRequest(
     Coordinate Coordinate,
-    MapStyle MapStyle,
+    MapDefinition MapStyle,
     List<AgentDefinition> Agents
 )
 {
     public static CreatePopulatedMapRequest Default => new(
         new(5, 5),
-        MapStyle.Default,
+        MapDefinition.Default(),
         [
             AgentDefinition.Colonist,
             AgentDefinition.Colonist,

@@ -22,18 +22,14 @@ public partial class Camera : Camera2D
     {
         Zoom = Vector2.One * InitialZoom;
         Enabled = true;
+        
+        PositionSmoothingEnabled = true;
+        PositionSmoothingSpeed = 8f;
         ResetSmoothing();
     }
 
     public override void _UnhandledInput(InputEvent inputEvent)
     {
-        var direction = Input.GetVector(Left, Right, Up, Down);
-
-        if (direction != Vector2.Zero)
-        {
-            Pan(direction);
-        }
-
         if (inputEvent.IsActionPressed(ZoomInAction))
         {
             ZoomIn();
@@ -59,20 +55,23 @@ public partial class Camera : Camera2D
         Position = _surface * 0.5f;
     }
 
-    public void Pan(Vector2 direction)
+    private void Pan(Vector2 direction, float delta)
     {
-        Position += direction * (PanSpeed / Zoom.X);
-        Position = new Vector2(
-            Mathf.Clamp(Position.X, 0f, _surface.X),
-            Mathf.Clamp(Position.Y, 0f, _surface.Y));
+        Position += direction * (PanSpeed * delta / Zoom.X);
+        ClampPosition();
     }
 
     private void PanRelative(Vector2 offset)
     {
         Position -= offset / Zoom.X;
+        ClampPosition();
+    }
+
+    private void ClampPosition()
+    {
         Position = new Vector2(
-           Mathf.Clamp(Position.X, 0f, _surface.X),
-           Mathf.Clamp(Position.Y, 0f, _surface.Y));
+            Mathf.Clamp(Position.X, 0f, _surface.X),
+            Mathf.Clamp(Position.Y, 0f, _surface.Y));
     }
 
     public void ZoomIn()
@@ -89,5 +88,15 @@ public partial class Camera : Camera2D
     {
         zoom = Mathf.Clamp(zoom, MinimumZoom, MaximumZoom);
         Zoom = Vector2.One * zoom;
+    }
+
+    public override void _Process(double delta)
+    {
+        var direction = Input.GetVector(Left, Right, Up, Down);
+
+        if (direction != Vector2.Zero)
+        {
+            Pan(direction, (float)delta);
+        }
     }
 }

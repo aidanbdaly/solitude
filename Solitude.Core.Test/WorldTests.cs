@@ -9,8 +9,8 @@ public sealed class WorldTests
     {
         var world = CreateWorld(new(2, 1));
 
-        var firstId = world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Zero));
-        var secondId = world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Right));
+        var firstId = world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Zero));
+        var secondId = world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Right));
 
         Assert.Equal(0, firstId);
         Assert.Equal(1, secondId);
@@ -22,7 +22,7 @@ public sealed class WorldTests
     public void MoveAgent_MovesAgentWithinMap()
     {
         var world = CreateWorld(new(2, 1));
-        var id = world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Zero));
+        var id = world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Zero));
 
         world.MoveAgent(id, new(Coordinate.Zero, Coordinate.Right));
 
@@ -35,7 +35,7 @@ public sealed class WorldTests
     public void MoveAgent_MovesAgentBetweenMaps()
     {
         var world = CreateWorld(new(1, 1), new Coordinate(1, 0));
-        var id = world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Zero));
+        var id = world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Zero));
 
         world.MoveAgent(id, new(new(1, 0), Coordinate.Zero));
 
@@ -47,8 +47,8 @@ public sealed class WorldTests
     public void MoveAgent_OccupiedDestinationThrows()
     {
         var world = CreateWorld(new(2, 1));
-        var agentId = world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Zero));
-        world.CreateAgent(AgentDefinition, new(Coordinate.Zero, Coordinate.Right));
+        var agentId = world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Zero));
+        world.CreateAgent(AgentDefinition, new WorldAddress(Coordinate.Zero, Coordinate.Right));
 
         Assert.Throws<InvalidOperationException>(() =>
             world.MoveAgent(agentId, new(Coordinate.Zero, Coordinate.Right)));
@@ -60,7 +60,7 @@ public sealed class WorldTests
         var outOfBoundsWorld = CreateWorld(new(1, 1));
         var outOfBoundsAgentId = outOfBoundsWorld.CreateAgent(
             AgentDefinition,
-            new(Coordinate.Zero, Coordinate.Zero));
+            new WorldAddress(Coordinate.Zero, Coordinate.Zero));
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             outOfBoundsWorld.MoveAgent(
@@ -71,7 +71,7 @@ public sealed class WorldTests
         missingMapWorld.CreateMap(CreateMapStyle(new(1, 1)), Coordinate.Zero);
         var missingMapAgentId = missingMapWorld.CreateAgent(
             AgentDefinition,
-            new(Coordinate.Zero, Coordinate.Zero));
+            new WorldAddress(Coordinate.Zero, Coordinate.Zero));
 
         Assert.Throws<InvalidOperationException>(() =>
             missingMapWorld.MoveAgent(
@@ -101,7 +101,7 @@ public sealed class WorldTests
         long lastId = -1;
         foreach (var coordinate in coordinates)
         {
-            lastId = world.CreateAgent(AgentDefinition, new(coordinate, Coordinate.Zero));
+            lastId = world.CreateAgent(AgentDefinition, new WorldAddress(coordinate, Coordinate.Zero));
         }
 
         Assert.Equal(4, lastId);
@@ -122,17 +122,17 @@ public sealed class WorldTests
         return world;
     }
 
-    private static MapStyle CreateMapStyle(Coordinate mapSize)
-        => new()
-        {
-            Width = (uint)mapSize.X,
-            Height = (uint)mapSize.Y,
-            Generation = new()
-            {
-                NoiseScale = 0f,
-                WaterThreshold = float.MaxValue,
-                GrassThreshold = float.MaxValue,
-                FloraDensity = 0f
-            }
-        };
+    private static MapDefinition CreateMapStyle(Coordinate mapSize)
+    {
+        var palette = new TerrainPalette();
+        palette[byte.MaxValue] = TileType.Water;
+
+        return new(
+            (uint)mapSize.X,
+            (uint)mapSize.Y,
+            1,
+            0f,
+            0f,
+            palette);
+    }
 }

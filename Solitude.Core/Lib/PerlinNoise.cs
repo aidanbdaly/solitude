@@ -27,6 +27,12 @@ public static class PerlinNoise
         235
     };
 
+    public static float Noise2D01(float x, float y) =>
+      (Noise2D(x, y) + 1f) * 0.5f;
+
+    public static byte Noise2DByte(float x, float y) =>
+       (byte)MathF.Round(Noise2D01(x, y) * byte.MaxValue);
+
     public static float Noise2D(float x, float y)
     {
         var floorX = MathF.Floor(x);

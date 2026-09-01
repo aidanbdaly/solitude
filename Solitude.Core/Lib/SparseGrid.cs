@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid<T> where T : class
@@ -35,6 +36,8 @@ public sealed class SparseGrid<T>(uint width, uint height) : IReadOnlySparseGrid
             }
         }
     }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public T? Get(Coordinate coordinate)
     {

@@ -79,9 +79,8 @@ public partial class MapNode : Node2D
         {
             _cache = CacheTile(_map, TileAtlas.GetImage());
             _cacheStale = false;
+            QueueRedraw();
         }
-
-        QueueRedraw();
     }
 
     private static ImageTexture CacheTile(Map map, Image atlas)
@@ -96,11 +95,11 @@ public partial class MapNode : Node2D
         foreach (var (coordinate, tile) in map.Tile)
         {
             int srcX;
-            int srcY = (int)tile.Type * SourceTileSize;
+            int srcY = (int)tile * SourceTileSize;
 
             if (coordinate.Y != 0)
             {
-                srcX = (map.GetTile(new(coordinate.X, coordinate.Y - 1)).Type == tile.Type ? 1 : 0) * SourceTileSize;
+                srcX = (map.GetTile(new(coordinate.X, coordinate.Y - 1)) == tile ? 1 : 0) * SourceTileSize;
             }
             else
             {

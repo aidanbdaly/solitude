@@ -1,44 +1,12 @@
 using System;
 
 
-public sealed class Map(uint width, uint height)
+public sealed class MapService(uint width, uint height)
 {
+    public event EventHandler<MapChangedEvent>? MapChanged;
+
     public event EventHandler<TimeChangedEvent>? TimeChanged;
-
-    public int Width { get; } = checked((int)width);
-
-    public int Height { get; } = checked((int)height);
-
-    private readonly Time Time = new();
-
-    private readonly Grid<bool> _occupation = new(width, height);
-
-    private readonly Grid<TileType> _tile = new(width, height);
-
-    private readonly SparseGrid<Feature> _feature = new(width, height);
-
-    private readonly SparseGrid<Work> _work = new(width, height);
-
-    private readonly SparseGrid<Item> _item = new(width, height);
-
-    private readonly SparseGrid<ItemAggregate> _aggregate = new(width, height);
-
-    private readonly SparseGrid<Agent> _agent = new(width, height);
-
-    public IReadOnlyGrid<bool> Occupation => _occupation;
-
-    public IReadOnlyGrid<TileType> Tile => _tile;
-
-    public IReadOnlySparseGrid<Feature> Feature => _feature;
-
-    public IReadOnlySparseGrid<Work> Work => _work;
-
-    public IReadOnlySparseGrid<Item> Item => _item;
-
-    public IReadOnlySparseGrid<ItemAggregate> Aggregate => _aggregate;
-
-    public IReadOnlySparseGrid<Agent> Agent => _agent;
-
+    
     public void SetTime(uint newTime)
     {
         Time.Set(newTime);

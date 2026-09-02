@@ -1,5 +1,4 @@
 using Godot;
-using Solitude.Persistence;
 
 public partial class App : Node
 {
@@ -10,7 +9,7 @@ public partial class App : Node
 
     public void NewGame(NewGameRequest request)
     {
-        var game = new Game(request.WorldWidth, request.WorldHeight);
+        var game = new GameContext(request.WorldWidth, request.WorldHeight);
         game.CreatePopulatedMap(request.CreatePopulatedMapRequest);
         game.SetActiveMap(request.CreatePopulatedMapRequest.Coordinate);
 
@@ -27,7 +26,7 @@ public partial class App : Node
         GetTree().Quit();
     }
 
-    public void EnterGame(Game state)
+    public void EnterGame(GameContext state)
     {
         var game = GameScene.Instantiate<GameScene>();
 

@@ -1,1 +1,0 @@
-public sealed record ItemSnapshot(long Id, ItemType Type, int Count);

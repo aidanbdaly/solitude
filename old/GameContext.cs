@@ -1,40 +1,33 @@
-public sealed partial class Game(uint worldWidth, uint worldHeight, Coordinate activeMapCoordinate)
+public sealed class GameContext(Game game)
 {
-    public event EventHandler<MapChangedEvent>? MapChanged;
+    public const uint CycleLength = 600;
+    public const uint CycleStart = 200;
 
-    private Coordinate? _worldCoordinate = activeMapCoordinate;
 
-    public uint Width { get; } = worldWidth;
-    public uint Height { get; } = worldHeight;
+    private Game _game = game;
+    private GameIndex _index = new();
 
-    private long _nextAgentId;
-    private long _nextItemId;
-
-    private readonly Dictionary<long, Agent> _agent = [];
-    private readonly Dictionary<long, WorldAddress> _agentAddress = [];
-
-    private readonly Dictionary<long, Item> _item = [];
-    private readonly Dictionary<long, WorldAddress> _itemAddress = [];
-
-    private readonly SparseGrid<Map> _map = new(worldWidth, worldWidth);
 
     public long CreateItem(ItemType type, WorldAddress address)
     {
         var map = GetMap(address.WorldCoordinate);
 
-        var itemId = _nextItemId;
-        var item = new Item
+        var id = _game.NextItemId + 1;
+        var item = new Item(id, type, 1);
+
+        _game = _game with
         {
-            Id = itemId,
-            Type = type
+            NextItemId = id,
+            Items = [.. _game.Items, item]
         };
+
+
 
         map.SetItem(item, address.MapCoordinate);
         _item.Add(itemId, item);
         _itemAddress.Add(itemId, address);
-        _nextItemId++;
 
-        return itemId;
+        return id;
     }
 
     public long CreateAgent(AgentDefinition definition, WorldAddress address)
@@ -142,45 +135,4 @@ public sealed partial class Game(uint worldWidth, uint worldHeight, Coordinate a
 
 
 
-    internal Coordinate? ActiveWorldCoordinate => _worldCoordinate;
-
-    internal long NextAgentId => _nextAgentId;
-
-    internal long NextItemId => _nextItemId;
-
-    internal IReadOnlyDictionary<long, Agent> Agents => _agent;
-
-    internal IReadOnlyDictionary<long, Item> Items => _item;
-
-    internal IEnumerable<(Coordinate Coordinate, Map Map)> GetMaps()
-    {
-        foreach (var (coordinate, map) in _map)
-        {
-            yield return (coordinate, map);
-        }
-    }
-
-    internal void AddMap(Coordinate coordinate, Map map) => _map.Set(coordinate, map);
-
-    internal void AddAgent(Agent agent) => _agent.Add(agent.Id, agent);
-
-    internal void AddItem(Item item) => _item.Add(item.Id, item);
-
-    internal void PlaceAgent(long agentId, WorldAddress address)
-    {
-        GetMap(address.WorldCoordinate).SetAgent(_agent[agentId], address.MapCoordinate);
-        _agentAddress.Add(agentId, address);
-    }
-
-    internal void PlaceItem(long itemId, WorldAddress address)
-    {
-        GetMap(address.WorldCoordinate).SetItem(_item[itemId], address.MapCoordinate);
-        _itemAddress.Add(itemId, address);
-    }
-
-    internal void SetNextIds(long nextAgentId, long nextItemId)
-    {
-        _nextAgentId = nextAgentId;
-        _nextItemId = nextItemId;
-    }
 }

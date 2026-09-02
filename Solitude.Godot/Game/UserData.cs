@@ -4,8 +4,6 @@ using Godot;
 
 using FileAccess = Godot.FileAccess;
 
-namespace Solitude.Persistence;
-
 public static class UserData
 {
     public const string DefaultSlot = "default";
@@ -17,7 +15,7 @@ public static class UserData
         WriteIndented = true
     };
 
-    public static Game LoadGame(string slot)
+    public static GameContext LoadGame(string slot)
     {
         var path = GetPath(slot);
 
@@ -40,10 +38,10 @@ public static class UserData
             throw UserDataException.DeserialisationFailed(path, exception);
         }
 
-        return snapshot.ToGame();
+        return snapshot.ToContext();
     }
 
-    public static void SaveGame(string slot, Game game)
+    public static void SaveGame(string slot, GameContext game)
     {
         var directoryPath =
             ProjectSettings.GlobalizePath(SaveDirectory);

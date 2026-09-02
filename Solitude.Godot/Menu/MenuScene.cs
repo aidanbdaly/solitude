@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using Solitude.Persistence;
 
 public partial class MenuScene : Control
 {

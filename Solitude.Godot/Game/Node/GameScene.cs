@@ -6,7 +6,7 @@ public partial class GameScene : Node
     private MapNode _mapNode = null!;
     private ToolbarComponent _toolbar = null!;
 
-    private Game _game = null!;
+    private GameContext _game = null!;
 
     public override void _Ready()
     {
@@ -28,7 +28,7 @@ public partial class GameScene : Node
         _toolbar.SimulationSpeedRequested -= OnSimulationSpeedRequested;
     }
 
-    public void Bind(Game game)
+    public void Bind(GameContext game)
     {
         if (!IsNodeReady())
         {
